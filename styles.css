@@ -1,0 +1,20 @@
+.grid-container {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(10, 50px);
+  grid-template-columns: repeat(10, 50px);
+}
+
+.grid-item {
+  background-color: lightblue;
+  display: inline-block;
+  outline: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.free {
+  background: limegreen;
+}
+
+.blocked {
+  background: crimson;
+}
