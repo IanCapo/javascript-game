@@ -13,7 +13,6 @@ function createSquaresArray() {
 
 // Use objects from SquaresArray to render the board
 function renderBoard() {
-  blockSquares()
   const gridContainer = document.getElementById('game')
   squaresArray.map(obj => {
     let gridItem = document.createElement('div')
@@ -25,24 +24,37 @@ function renderBoard() {
     } else {
       gridItem.classList.add('free')
     }
-    gridItem.setAttribute('row', obj.row, 'column', obj.column)
+    gridItem.setAttribute('data-row', obj.row)
+    gridItem.setAttribute('data-column', obj.column)
 
     gridContainer.appendChild(gridItem)
   })
 }
 
-function blockSquares() {
-  let numOfBlockedSquares = createRandomNumber(10, 20)
-  console.log('num of squares', numOfBlockedSquares)
-  let i = 0
-  for (i; i < numOfBlockedSquares; i++) {
-    let num = createRandomNumber(0, squaresArray.length - 1)
+let squaresCounter = createRandomNumber(10, 20)
+let counter = 0
+function blockSquares(squaresCounter) {
+  if (counter > squaresCounter) {
+    let check = checkIfFree(
+      squaresArray[createRandomNumber(0, squaresArray.length)],
+    )
+    let num = createRandomNumber(0, squaresArray.length - 1) // recheck
+    console.log(check)
+    // console.log(squaresArray[num])
     if (squaresArray[num].state === 'blocked') {
       console.log('taken', i)
-      i--
+      blockSquares(squaresCounter)
+    } else if (!check) {
+      console.log('path not free')
+      blockSquares(squaresCounter)
     } else {
+      console.log(squaresCounter)
       squaresArray[num].state = 'blocked'
+      // squaresCounter--
+      counter++
     }
+  } else {
+    console.log('not working')
   }
 }
 
@@ -57,35 +69,30 @@ function checkIfFree(obj) {
   let row = obj.row
   let col = obj.column
   let state = obj.state
+  let counter = 0
+  console.log('my object', row, col, state)
 
-  console.log(row, col, state)
+  for (let i = 0; i < squaresArray.length; i++) {
+    let east = squaresArray[i].column === col && squaresArray[i].row === row + 1
+    let west = squaresArray[i].column === col && squaresArray[i].row === row - 1
+    let south =
+      squaresArray[i].column === col - 1 && squaresArray[i].row === row
+    let north =
+      squaresArray[i].column === col + 1 && squaresArray[i].row === row
 
-  let newObj = { row: row + 2, column: col }
-
-  console.log(newObj)
-
-  // switch (num) {
-  //   case row === 1:
-  //     return (
-  //       (squaresArray[num + 10].state === 'free' &&
-  //         squaresArray[num + 1].state === 'free') ||
-  //       (squaresArray[num + 10].state === 'free' &&
-  //         squaresArray[num - 1].state === 'free') ||
-  //       (squaresArray[num + 1].state === 'free' &&
-  //         squaresArray[num - 1].state === 'free')
-  //     )
-  //   case num > 10:
-  //     return (
-  //       (squaresArray[num - 10].state === 'free' &&
-  //         squaresArray[num + 1].state === 'free') ||
-  //       (squaresArray[num - 10].state === 'free' &&
-  //         squaresArray[num - 1].state === 'free') ||
-  //       (squaresArray[num + 1].state === 'free' &&
-  //         squaresArray[num - 1].state === 'free')
-  //     )
-  // }
+    if (east || west || south || north) {
+      if (squaresArray[i].state === 'blocked') {
+        counter++
+        console.log(counter, 'blocked')
+        if (counter > 1) {
+          return false
+        }
+      }
+    }
+  }
+  return true
 }
 
 createSquaresArray()
 renderBoard()
-checkIfFree(squaresArray[1])
+blockSquares(squaresCounter)
