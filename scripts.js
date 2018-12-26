@@ -1,9 +1,9 @@
 const squaresArray = []
-const numOfBlockedSquaresArray = []
 
+//Create an array of object with coordinates
 function createSquaresArray() {
-  for (let x = 0; x < 10; x++) {
-    for (let y = 0; y < 10; y++) {
+  for (let x = 1; x < 11; x++) {
+    for (let y = 1; y < 11; y++) {
       let square = { row: x, column: y, state: 'free' }
 
       squaresArray.push(square)
@@ -11,13 +11,15 @@ function createSquaresArray() {
   }
 }
 
-function renderField() {
+// Use objects from SquaresArray to render the board
+function renderBoard() {
   blockSquares()
   const gridContainer = document.getElementById('game')
   squaresArray.map(obj => {
     let gridItem = document.createElement('div')
     gridItem.classList.add('grid-item')
-    gridItem.innerHTML = 'S'
+    gridItem.innerHTML = squaresArray.indexOf(obj)
+
     if (obj.state === 'blocked') {
       gridItem.classList.add('blocked')
     } else {
@@ -29,20 +31,61 @@ function renderField() {
   })
 }
 
-function createRandomNumber(min, max) {
-  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
-
-  return randomNumber
-}
-
-function blockSquares(obj, index) {
-  let numOfBlockedSquares = createRandomNumber(4, 12)
-  console.log(numOfBlockedSquares)
-
-  for (i = 0; i < numOfBlockedSquares; i++) {
-    squaresArray[createRandomNumber(0, squaresArray.length)].state = 'blocked'
+function blockSquares() {
+  let numOfBlockedSquares = createRandomNumber(10, 20)
+  console.log('num of squares', numOfBlockedSquares)
+  let i = 0
+  for (i; i < numOfBlockedSquares; i++) {
+    let num = createRandomNumber(0, squaresArray.length - 1)
+    if (squaresArray[num].state === 'blocked') {
+      console.log('taken', i)
+      i--
+    } else {
+      squaresArray[num].state = 'blocked'
+    }
   }
 }
 
+// -------------  helper functions -------------
+
+function createRandomNumber(min, max) {
+  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
+  return randomNumber
+}
+
+function checkIfFree(obj) {
+  let row = obj.row
+  let col = obj.column
+  let state = obj.state
+
+  console.log(row, col, state)
+
+  let newObj = { row: row + 2, column: col }
+
+  console.log(newObj)
+
+  // switch (num) {
+  //   case row === 1:
+  //     return (
+  //       (squaresArray[num + 10].state === 'free' &&
+  //         squaresArray[num + 1].state === 'free') ||
+  //       (squaresArray[num + 10].state === 'free' &&
+  //         squaresArray[num - 1].state === 'free') ||
+  //       (squaresArray[num + 1].state === 'free' &&
+  //         squaresArray[num - 1].state === 'free')
+  //     )
+  //   case num > 10:
+  //     return (
+  //       (squaresArray[num - 10].state === 'free' &&
+  //         squaresArray[num + 1].state === 'free') ||
+  //       (squaresArray[num - 10].state === 'free' &&
+  //         squaresArray[num - 1].state === 'free') ||
+  //       (squaresArray[num + 1].state === 'free' &&
+  //         squaresArray[num - 1].state === 'free')
+  //     )
+  // }
+}
+
 createSquaresArray()
-renderField()
+renderBoard()
+checkIfFree(squaresArray[1])

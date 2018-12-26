@@ -6,15 +6,14 @@
 }
 
 .grid-item {
-  background-color: lightblue;
   display: inline-block;
   outline: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-.free {
-  background: limegreen;
-}
-
 .blocked {
   background: crimson;
+}
+
+.free {
+  background: rgb(107, 191, 107);
 }
