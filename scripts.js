@@ -14,7 +14,15 @@ function createSquaresArray() {
 
 // Use objects from SquaresArray to render the board
 let squaresCounter = createRandomNumber(10, 20)
-console.log(squaresCounter)
+// console.log(squaresCounter)
+
+// function blockSquares() {
+//   let row = createRandomNumber(1, 10)
+//   let column = createRandomNumber(1, 10)
+//   let square = $("[data-row=" + row + "][data-col=" + column + "]").hasClass('free')
+//   console.log('square', square)
+
+// }
 function blockSquares() {
   // console.log('start of iteration', squaresCounter)
   let num = createRandomNumber(0, squaresArray.length - 1)
@@ -42,7 +50,6 @@ function blockSquares() {
       blockSquares()
     }
   } else {
-    console.log('end of iteration')
   }
 }
 
@@ -72,39 +79,26 @@ function renderBoard() {
 
 function movePlayer(player, $this) {
   // find html entity with old position
-  $(`.${player}`)
-    .addClass('free')
-    .removeClass(player)
-  // $this jquery-Node that was clicked
-  $this.removeClass('free').addClass(player)
-
+  if (checkPlayerPath(player, $this)) {
+    $(`.${player}`)
+      .addClass('free')
+      .removeClass(player)
+    // $this jquery-Node that was clicked
+    $this.removeClass('free').addClass(player)
+  } else {
+    alert('you cannot move more than 3 squares at a time')
+  }
+  startFight($this, activePlayer)
+  collectWeapon($this, player)
   checkWin()
+  switchPlayers()
 }
 
+// Eventlistener in grid-items
 $('.grid-container').on('click', '.grid-item', function() {
   movePlayer(activePlayer, $(this))
 })
 
-function checkWin() {
-  let win = false
-  let lost = false
-
-  if (win) {
-    console.log('player wins')
-  } else if (lost) {
-    console.log('player lost')
-  } else {
-    if (activePlayer === 'playerOne') {
-      activePlayer = 'playerTwo'
-      console.log('activePlayer', activePlayer)
-    } else {
-      activePlayer = 'playerOne'
-      console.log('activePlayer', activePlayer)
-    }
-  }
-}
-
-// -------- TODO: add position to players
 class Player {
   constructor(name, image, healthscore, weapon, position) {
     this.name = name
@@ -124,18 +118,19 @@ class Player {
       square.row === 10 ||
       square.column === 10
 
-    console.log('player', square)
+    // console.log('player', square)
 
     if (square.state != 'free' || edge) {
       randomSquare
-      console.log('square is blocked')
+      // console.log('square is blocked')
       this.placePlayer()
     } else if (!checkIfPathFree(square)) {
-      console.log('path free')
+      // console.log('path free')
       // console.log('state', square.state)
       square.state = this.name
-      this.position = square
-      console.log('positon', this.position)
+      this.position = { row: square.row, column: square.column }
+      // console.log('this', this)
+      // console.log('position', this.position)
     }
   }
 }
@@ -160,20 +155,19 @@ class Weapon {
 
     if (square.state != 'free' || edge) {
       randomSquare
-      console.log('square is blocked')
       this.placeWeapon()
     } else if (!checkIfPathFree(square)) {
-      console.log('path free')
-      // console.log('state', square.state)
       square.state = this.name
       this.position = square
     }
   }
 }
 
-const playerOne = new Player('playerOne', 'image', 100, 'hammer')
-const playerTwo = new Player('playerTwo', 'image', 100, 'hammer')
+const playerOne = new Player('playerOne', 'image', 100, 'knife')
+const playerTwo = new Player('playerTwo', 'image', 100, 'knife')
 const hammer = new Weapon('hammer', 'image', 10)
+const gun = new Weapon('gun', 'image', 80)
+const knife = new Weapon('knife', 'image', 50)
 
 // -------------  helper functions -------------
 
@@ -181,39 +175,6 @@ function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
   return randomNumber
 }
-
-// function checkIfFree(obj) {
-//   //console.log('obj', obj)
-//   let row = obj.row
-//   let col = obj.column
-//   let state = obj.state
-//   let counter = 0
-//   //console.log('my object', row, col, state)
-//   for (let i = 0; i < squaresArray.length; i++) {
-//     let east = squaresArray[i].column === col && squaresArray[i].row === row + 1
-//     let west = squaresArray[i].column === col && squaresArray[i].row === row - 1
-//     let south =
-//       squaresArray[i].column === col - 1 && squaresArray[i].row === row
-//     let north =
-//       squaresArray[i].column === col + 1 && squaresArray[i].row === row
-//     if (
-//       (north.state === 'free' && east.state === 'free') ||
-//       (north.state === 'free' && west.state === 'free') ||
-//       (south.state === 'free' && east.state === 'free') ||
-//       (south.state === 'free' && west.state === 'free')
-//     ) {
-//       if (squaresArray[i].state === 'blocked') {
-//         console.log('sqauresArray', squaresArray[i])
-//         counter++
-//         console.log(counter, 'blocked')
-//         if (counter > 1) {
-//           return false
-//         }
-//       }
-//     }
-//   }
-//   return true
-// }
 
 function checkIfPathFree(square) {
   let row = square.row
@@ -267,37 +228,113 @@ function checkIfPathFree(square) {
   }
 }
 
+function checkPlayerPath(player, clickedSquare) {
+  let playerRow
+  let playerColumn
+
+  let squareColumn = clickedSquare.attr('data-column')
+  let squareRow = clickedSquare.attr('data-row')
+  // console.log('clickedSquare Column', squareColumn)
+  // console.log('clickedSquare Row', squareRow)
+
+  if (player === 'playerOne') {
+    playerRow = playerOne.position.row
+    playerColumn = playerOne.position.column
+    console.log('1 playerRow', playerRow, 'playerColumn', playerColumn)
+    console.log('square row', squareRow, 'square column', squareColumn)
+  } else {
+    playerRow = playerTwo.position.row
+    playerColumn = playerTwo.position.column
+    console.log('2 playerRow', playerRow, 'playerColumn', playerColumn)
+    console.log('square row', squareRow, 'square column', squareColumn)
+  }
+
+  const northSouth = Math.abs(squareRow - playerRow)
+  const eastWest = Math.abs(squareColumn - playerColumn)
+  console.log('NS', northSouth, 'EW', eastWest)
+
+  if (
+    (northSouth <= 3 && eastWest === 0) ||
+    (northSouth === 0 && eastWest <= 3)
+  ) {
+    console.log(`${player} moves`)
+    return true
+  } else {
+    console.log(`${player} cannot move`)
+    return false
+  }
+}
+
+// change function to work with object player instead if string
+function checkWin() {
+  let win = false
+  let lost = false
+
+  if (win) {
+    console.log('wins')
+    return 'win'
+  }
+
+  if (lost) {
+    console.log('lost')
+    return 'lost'
+  }
+}
+
+function switchPlayers() {
+  if (activePlayer === 'playerOne') {
+    activePlayer = 'playerTwo'
+    console.log('activePlayer', activePlayer)
+  } else {
+    activePlayer = 'playerOne'
+    console.log('activePlayer', activePlayer)
+  }
+}
+
+// check if target square containes a weapon and if so adds it to the weapon key in player object
+function collectWeapon(clickedSquare, player) {
+  let playerNow = player
+
+  if (playerNow === 'playerOne') {
+    playerNow = playerOne
+  } else {
+    playerNow = playerTwo
+  }
+  console.log(playerNow)
+  console.log(clickedSquare)
+
+  if (clickedSquare.hasClass('hammer')) {
+    playerNow.weapon = 'hammer'
+    console.log('player weapon', playerNow)
+    clickedSquare.removeClass('hammer').addClass('free')
+  } else {
+    console.log('no weapon')
+  }
+}
+
+function startFight(clickedSquare, player) {
+  let playerActiveNow = player
+  // console.log('active player: ', playerActiveNow)
+  // console.log(clickedSquare)
+
+  if (playerActiveNow === 'playerOne') {
+    playerActiveNow = playerOne
+    passivePlayer = playerTwo
+    console.log(playerActiveNow)
+  } else {
+    playerActiveNow = playerTwo
+    passivePlayer = playerOne
+    console.log(playerActiveNow)
+  }
+
+  if (clickedSquare.hasClass('free') || clickedSquare.hasClass('hammer')) {
+    console.log('no fight')
+    return
+  } else {
+    console.log(playerActiveNow, 'starts fight')
+    return
+  }
+}
+
 createSquaresArray()
 renderBoard()
-
-// if (
-//   squaresArray.find(isSouth).state === 'free' &&
-//   squaresArray.find(isEast).state === 'free'
-// ) {
-//   console.log('row: 1, col: 1')
-//   return true
-// }
-//   } else if (square.row === 1 && square.column === 10) {
-//   if (
-//     squaresArray.find(isSouth).state === 'free' &&
-//     squaresArray.find(isWest).state === 'free'
-//   ) {
-//     console.log('row: 1, col: 10')
-//     return true
-//   }
-// } else if (square.row === 10 && square.column === 1) {
-//   if (
-//     squaresArray.find(isNorth).state === 'free' &&
-//     squaresArray.find(isEast).state === 'free'
-//   ) {
-//     console.log('row: 10, col: 1')
-//     return true
-//   } else if (square.row === 10 && square.column === 10) {
-// if (
-//   squaresArray.find(isNorth).state === 'free' &&
-//   squaresArray.find(isEast).state === 'free'
-// ) {
-//   console.log('row: 10, col: 10')
-//   return true
-// }
-//   }
