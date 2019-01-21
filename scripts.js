@@ -1,5 +1,4 @@
 const squaresArray = []
-let activePlayer = 'playerOne'
 
 //Create an array of object with coordinates
 function createSquaresArray() {
@@ -77,19 +76,28 @@ function renderBoard() {
   })
 }
 
-function movePlayer(player, $this) {
-  // find html entity with old position
+function movePlayer(activePlayer, $this) {
+  let player = activePlayer
+
+  checkPlayerPath(player, $this)
+  checkBlockedSquares(player, $this)
   if (checkPlayerPath(player, $this)) {
-    $(`.${player}`)
+    $(`.${player.name}`)
       .addClass('free')
-      .removeClass(player)
+      .removeClass(`${player.name}`)
     // $this jquery-Node that was clicked
-    $this.removeClass('free').addClass(player)
+    $this.removeClass('free').addClass(`${player.name}`)
+
+    player.position = {
+      row: $this[0].attributes['data-row'].value,
+      column: $this[0].attributes['data-column'].value,
+    }
+    console.log(player.position)
   } else {
     alert('you cannot move more than 3 squares at a time')
   }
-  startFight($this, activePlayer)
-  collectWeapon($this, player)
+  // startFight($this, activePlayer)
+  // collectWeapon($this, player)
   checkWin()
   switchPlayers()
 }
@@ -234,19 +242,13 @@ function checkPlayerPath(player, clickedSquare) {
 
   let squareColumn = clickedSquare.attr('data-column')
   let squareRow = clickedSquare.attr('data-row')
-  // console.log('clickedSquare Column', squareColumn)
-  // console.log('clickedSquare Row', squareRow)
 
-  if (player === 'playerOne') {
+  if (player === playerOne) {
     playerRow = playerOne.position.row
     playerColumn = playerOne.position.column
-    console.log('1 playerRow', playerRow, 'playerColumn', playerColumn)
-    console.log('square row', squareRow, 'square column', squareColumn)
   } else {
     playerRow = playerTwo.position.row
     playerColumn = playerTwo.position.column
-    console.log('2 playerRow', playerRow, 'playerColumn', playerColumn)
-    console.log('square row', squareRow, 'square column', squareColumn)
   }
 
   const northSouth = Math.abs(squareRow - playerRow)
@@ -257,15 +259,14 @@ function checkPlayerPath(player, clickedSquare) {
     (northSouth <= 3 && eastWest === 0) ||
     (northSouth === 0 && eastWest <= 3)
   ) {
-    console.log(`${player} moves`)
+    console.log(`${player.name} moves`)
     return true
   } else {
-    console.log(`${player} cannot move`)
+    console.log(`${player.name} cannot move`)
     return false
   }
 }
 
-// change function to work with object player instead if string
 function checkWin() {
   let win = false
   let lost = false
@@ -282,59 +283,117 @@ function checkWin() {
 }
 
 function switchPlayers() {
-  if (activePlayer === 'playerOne') {
-    activePlayer = 'playerTwo'
-    console.log('activePlayer', activePlayer)
+  if (activePlayer === playerOne) {
+    activePlayer = playerTwo
+    console.log('activePlayer', activePlayer.name)
   } else {
-    activePlayer = 'playerOne'
-    console.log('activePlayer', activePlayer)
+    activePlayer = playerOne
+    console.log('activePlayer', activePlayer.name)
+  }
+}
+
+function checkBlockedSquares(player, clickedSquare) {
+  let playerRow
+  let playerColumn
+
+  let squareColumn = clickedSquare.attr('data-column')
+  let squareRow = clickedSquare.attr('data-row')
+
+  if (player === playerOne) {
+    playerRow = playerOne.position.row
+    playerColumn = playerOne.position.column
+  } else {
+    playerRow = playerTwo.position.row
+    playerColumn = playerTwo.position.column
+  }
+
+  const north = Math.abs(squareRow - playerRow)
+  const south = Math.abs(squareRow - playerRow)
+  const east = Math.abs(squareColumn - playerColumn)
+  const west = Math.abs(squareColumn - playerColumn)
+
+  if (north >= 1) {
+    console.log('player moving north')
+    for (let i = 0; i <= north; i++) {
+      if (
+        $(
+          '[data-row=' +
+            (playerColumn - i) +
+            '][data-column=' +
+            player.position.row +
+            ']',
+        ).hasClass('blocked')
+      ) {
+        console.log(activePlayer.name, 'cannot move, path north not free')
+      } else {
+        console.log('free path')
+      }
+    }
+  } else if (south >= 1) {
+    for (let i = 0; i <= south; i++) {
+      if (
+        $(
+          '[data-row=' +
+            (playerColumn - i) +
+            '][data-column=' +
+            player.position.row +
+            ']',
+        ).hasClass('blocked')
+      ) {
+        console.log('path not free')
+      } else {
+        console.log('path free')
+      }
+    }
   }
 }
 
 // check if target square containes a weapon and if so adds it to the weapon key in player object
-function collectWeapon(clickedSquare, player) {
-  let playerNow = player
+// function collectWeapon(clickedSquare, player) {
+//   let playerNow = player
 
-  if (playerNow === 'playerOne') {
-    playerNow = playerOne
-  } else {
-    playerNow = playerTwo
-  }
-  console.log(playerNow)
-  console.log(clickedSquare)
+//   if (playerNow === 'playerOne') {
+//     playerNow = playerOne
+//   } else {
+//     playerNow = playerTwo
+//   }
+//   console.log(playerNow)
+//   console.log(clickedSquare)
 
-  if (clickedSquare.hasClass('hammer')) {
-    playerNow.weapon = 'hammer'
-    console.log('player weapon', playerNow)
-    clickedSquare.removeClass('hammer').addClass('free')
-  } else {
-    console.log('no weapon')
-  }
-}
+//   if (clickedSquare.hasClass('hammer')) {
+//     playerNow.weapon = 'hammer'
+//     console.log('player weapon', playerNow)
+//     clickedSquare.removeClass('hammer').addClass('free')
+//   } else {
+//     console.log('no weapon')
+//   }
+// }
 
-function startFight(clickedSquare, player) {
-  let playerActiveNow = player
-  // console.log('active player: ', playerActiveNow)
-  // console.log(clickedSquare)
+// function startFight(clickedSquare, player) {
+//   let playerActiveNow = player
+//   // console.log('active player: ', playerActiveNow)
+//   // console.log(clickedSquare)
 
-  if (playerActiveNow === 'playerOne') {
-    playerActiveNow = playerOne
-    passivePlayer = playerTwo
-    console.log(playerActiveNow)
-  } else {
-    playerActiveNow = playerTwo
-    passivePlayer = playerOne
-    console.log(playerActiveNow)
-  }
+//   if (playerActiveNow === 'playerOne') {
+//     playerActiveNow = playerOne
+//     passivePlayer = playerTwo
+//     console.log(playerActiveNow)
+//   } else {
+//     playerActiveNow = playerTwo
+//     passivePlayer = playerOne
+//     console.log(playerActiveNow)
+//   }
 
-  if (clickedSquare.hasClass('free') || clickedSquare.hasClass('hammer')) {
-    console.log('no fight')
-    return
-  } else {
-    console.log(playerActiveNow, 'starts fight')
-    return
-  }
-}
+//   if (clickedSquare.hasClass('free') || clickedSquare.hasClass('hammer')) {
+//     console.log('no fight')
+//     return
+//   } else {
+//     console.log(playerActiveNow, 'starts fight')
+//     return
+//   }
+// }
+
+let activePlayer = playerOne
 
 createSquaresArray()
 renderBoard()
