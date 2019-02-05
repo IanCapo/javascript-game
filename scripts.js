@@ -128,7 +128,7 @@ $('.grid-container').on('click', '.grid-item', function() {
 
 function movePlayer($this) {
   let squareCheck = checkBlockedSquares($this)
-  console.log('squareCheck', squareCheck)
+  //console.log('squareCheck', squareCheck)
 
   if (checkPlayerPath(activePlayer, $this) /*&& squareCheck)*/) {
     $(`.${activePlayer.name}`)
@@ -218,7 +218,7 @@ function checkPlayerPath(player, $clickedSquare) {
 
   const northSouth = Math.abs(squareRow - playerRow)
   const eastWest = Math.abs(squareColumn - playerColumn)
-  console.log('NS', northSouth, 'EW', eastWest)
+  //console.log('NS', northSouth, 'EW', eastWest)
 
   if (
     (northSouth <= 3 && eastWest === 0) ||
@@ -232,77 +232,7 @@ function checkPlayerPath(player, $clickedSquare) {
   }
 }
 
-
-
-// function checkDistance(distance, squareCheck, direction) {
-//   console.log(
-//     'squareCheck',
-//     squareCheck,
-//     'distance',
-//     distance,
-//     'direction',
-//     direction,
-//   )
-//
-//   if (direction === 'northSouth') {
-//     for (let i = 0; i <= distance; i++) {
-//       let isBlocked = $(
-//         '[data-row=' +
-//           (activePlayer.position.row - i) +
-//           '][data-column=' +
-//           activePlayer.position.column +
-//           ']',
-//       ).hasClass('blocked')
-//       console.log('isBlocked', isBlocked)
-//       if (isBlocked) {
-//         console.log(
-//           activePlayer.name,
-//           `cannot move, path ${direction} not free`,
-//         )
-//         alert('path not free - try again')
-//         squareCheck = true
-//         console.log(squareCheck)
-//         return true
-//       } else {
-//         squareCheck = false
-//         console.log('test')
-//       }
-//     }
-//   } else if (direction === 'eastWest') {
-//     for (let i = 0; i <= distance; i++) {
-//       if (
-//         $(
-//           '[data-column' +
-//             (activePlayer.position.column - i) +
-//             '][data-row=' +
-//             activePlayer.position.row +
-//             ']',
-//         ).hasClass('blocked') ||
-//         $(
-//           '[data-column' +
-//             (activePlayer.position.column + i) +
-//             '][data-row=' +
-//             activePlayer.position.row +
-//             ']',
-//         ).hasClass('blocked')
-//       ) {
-//         console.log(
-//           activePlayer.name,
-//           `cannot move, path ${direction} not free`,
-//         )
-//         alert('path not free - try again')
-//         squareCheck = true
-//         console.log(squareCheck)
-//         return squareCheck
-//       }
-//     }
-//   } else {
-//     console.log('checkDistance: free path')
-//   }
-// }
-
 function checkBlockedSquares($clickedSquare) {
-
   let squareCheck = false
 
   let playerRow = activePlayer.position.row
@@ -313,55 +243,67 @@ function checkBlockedSquares($clickedSquare) {
 
   const northSouth = squareRow - playerRow //7 - 5 = -2
   const eastWest = squareColumn - playerColumn
+  console.log('eastWest', eastWest, 'northSouth', northSouth)
 
-  // if (northSouth >= 1 && eastWest === 0) {
-  //   checkDistance(northSouth, squareCheck, 'northSouth')
-  // } else if (eastWest >= 1 && northSouth === 0) {
-  //   checkDistance(eastWest, squareCheck, 'eastWest')
-  // }
+  let traversedSquares = []
 
-  let traversedSquares = [];
-    //if traveling north, create an array of traversed squares
-    if(eastWest === 0 && parseInt(northSouth) <= 3) {
-      // console.log('moving northSouth');
-      if(northSouth >= 0) { //down
-        // console.log('moiving down');
-
-        //need to create an array of traversed squaresArray
-        for(let i = 0; i < northSouth; i++) {
-          let thisSquare =  { thisRow: playerRow + i, thisColumn: playerColumn };
-          console.log('thisSquare', thisSquare);
-          traversedSquares.push(thisSquare);
-          console.log('traversedSquares', traversedSquares);
+  //if traveling north or south, create an array of traversed squares
+  if (eastWest === 0 && parseInt(northSouth) <= 3) {
+    console.log('moving northSouth')
+    if (northSouth >= 0) {
+      //south
+      for (let i = 0; i < northSouth; i++) {
+        let thisSquare = { thisRow: playerRow + i, thisColumn: playerColumn }
+        traversedSquares.push(thisSquare)
+        console.log('trav.Squares', traversedSquares)
+      }
+    } else if (northSouth <= 0) {
+      //north
+      for (let i = 0; i > northSouth; i--) {
+        let thisSquare = { thisRow: playerRow + i, thisColumn: playerColumn }
+        traversedSquares.push(thisSquare)
+        console.log('trav.Squares', traversedSquares)
+      }
+    }
+    ///call move player, passit traversedSquares
+  } else if (northSouth === 0 && parseInt(eastWest) <= 3) {
+    //east
+    // console.log('inside eastWest', eastWest)
+    if (eastWest > 0) {
+      // console.log('inside east', eastWest)
+      for (let i = 0; i > eastWest; i--) {
+        // console.log('inside for east')
+        let thisSquare = { thisRow: playerRow, thisColumn: playerColumn + i }
+        traversedSquares.push(thisSquare)
+        console.log('trav.Squares', traversedSquares)
+      }
+    } else if (eastWest < 0) {
+      //west
+      // console.log('inside west', eastWest)
+      for (let i = 0; i < eastWest; i++) {
+        // console.log('inside for west')
+        // console.log('inside')
+        // console.log('eastWest', eastWest, 'i', i)
+        let thisSquare = {
+          thisRow: playerRow,
+          thisColumn: playerColumn + i,
         }
-
-      } else if (northSouth < 0){ //up
-        // console.log('moving up');
-
+        traversedSquares.push(thisSquare)
+        console.log('trav.Squares', traversedSquares)
       }
-          ///call move player, passit traversedSquares
-    } else if (northSouth === 0 && parseInt(eastWest) <= 3) { //else if traveling south, create an array of traversed squares
-      // console.log('moving east west');
-      if(eastWest >= 0) { //east
-
-      } else if(eastWest < 0) { //west
-
-      }
-          ///call move player
-    } else { console.log('moving incorrectly: more than 3 squares or vertically');}
-    ///call move player
-
+    }
+  } else {
+    console.log('moving incorrectly: more than 3 squares or vertically')
+  }
+  ///call move player
 }
-
-
-
 
 //function to check this array for blocked squares
-let isBlocked = false;
-for(//iterate over traversedarray) {
-  $(["data-row"+traversedarray[i]][]).hasClass(''blocked')
-  isBlocked = true
-}
+// let isBlocked = false;
+// for(/*iterate over traversedarray*/) {
+//   $(["data-row"+traversedarray[i]]["data-column"]).hasClass(''blocked')
+//   isBlocked = true
+// }
 
 //return isBlocked
 
@@ -369,14 +311,6 @@ for(//iterate over traversedarray) {
 
 //if blocked, no moves
 //else move
-
-
-
-
-
-
-
-
 
 function checkWin() {
   let win = false
