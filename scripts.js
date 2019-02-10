@@ -111,7 +111,7 @@ function renderBoard() {
   squaresArray.map(obj => {
     let gridItem = document.createElement('div')
     gridItem.classList.add('grid-item')
-    gridItem.innerHTML = squaresArray.indexOf(obj)
+    gridItem.innerHTML = `row: ${obj.row} col: ${obj.column}`
     gridItem.classList.add(obj.state)
 
     gridItem.setAttribute('data-row', obj.row)
@@ -131,24 +131,19 @@ $('.grid-container').on('click', '.grid-item', function () {
 function movePlayer($this) {
   let squareCheck = createTraversedSquares($this)
 
-  console.log('squareCheck', squareCheck)
-  if(!squareCheck) {
-    if (checkPlayerPath(activePlayer, $this) /*&& squareCheck)*/) {
-      $(`.${activePlayer.name}`)
-        .addClass('free')
-        .removeClass(`${activePlayer.name}`)
-      // $this jquery-Node that was clicked
-      $this.removeClass('free').addClass(`${activePlayer.name}`)
+  if (squareCheck) {
+    $(`.${activePlayer.name} `)
+      .addClass('free')
+      .removeClass(`${activePlayer.name} `)
+    // $this jquery-Node that was clicked
+    $this.removeClass('free').addClass(`${activePlayer.name} `)
 
-      activePlayer.position = {
-        row: $this[0].attributes['data-row'].value,
-        column: $this[0].attributes['data-column'].value,
-      }
-    } else {
-      alert('you cannot move more than 3 squares at a time')
+    activePlayer.position = {
+      row: $this[0].attributes['data-row'].value,
+      column: $this[0].attributes['data-column'].value,
     }
-    //startFight($this, activePlayer)
-    //collectWeapon($this, player)
+    startFight($this)
+    collectWeapon($this, activePlayer)
     checkWin()
     switchPlayers()
 
@@ -218,125 +213,73 @@ function checkIfPathFree(square) {
   }
 }
 
-function checkPlayerPath(player, $clickedSquare) {
-  let playerRow = player.position.row
-  let playerColumn = player.position.column
-
-  let squareColumn = $clickedSquare.attr('data-column')
-  let squareRow = $clickedSquare.attr('data-row')
-
-  const northSouth = Math.abs(squareRow - playerRow)
-  const eastWest = Math.abs(squareColumn - playerColumn)
-  //console.log('NS', northSouth, 'EW', eastWest)
-
-  if (
-    (northSouth <= 3 && eastWest === 0) ||
-    (northSouth === 0 && eastWest <= 3)
-  ) {
-    console.log(`${player.name} moves`)
-    return true
-  } else {
-    console.log(`${player.name} cannot move`)
-    return false
-  }
-}
-
 function createTraversedSquares($clickedSquare) {
-  let squareCheck = false
-
   let playerRow = activePlayer.position.row
   let playerColumn = activePlayer.position.column
 
   let squareColumn = $clickedSquare.attr('data-column')
   let squareRow = $clickedSquare.attr('data-row')
 
-  const northSouth = squareRow - playerRow //7 - 5 = -2
+  const northSouth = squareRow - playerRow
   const eastWest = squareColumn - playerColumn
-  console.log('eastWest', eastWest, 'northSouth', northSouth)
 
   let traversedSquares = []
+  let isBlocked
 
   //if traveling north or south, create an array of traversed squares
   if (eastWest === 0 && parseInt(northSouth) <= 3) {
-    console.log('moving northSouth')
     if (northSouth >= 0) {
       //south
-      for (let i = 0; i < northSouth; i++) {
+      for (let i = 0; i <= northSouth; i++) {
         let thisSquare = { thisRow: parseInt(playerRow) + i, thisColumn: playerColumn }
         traversedSquares.push(thisSquare)
-        console.log('trav.Squares', traversedSquares)
       }
     } else if (northSouth <= 0) {
       //north
-      for (let i = 0; i > northSouth; i--) {
+      for (let i = 0; i >= northSouth; i--) {
         let thisSquare = { thisRow: parseInt(playerRow) + i, thisColumn: playerColumn }
         traversedSquares.push(thisSquare)
-        console.log('trav.Squares', traversedSquares)
       }
     }
+    isBlocked = checkTraversedSquares(traversedSquares)
+    return isBlocked;
     ///call move player, passit traversedSquares
   } else if (northSouth === 0 && parseInt(eastWest) <= 3) {
     //east
-    console.log('inside eastWest', eastWest)
     if (eastWest > 0) {
-      for (let i = 0; i < eastWest; i++) {
+      for (let i = 0; i <= eastWest; i++) {
         let thisSquare = { thisRow: playerRow, thisColumn: parseInt(playerColumn) + i }
         traversedSquares.push(thisSquare)
-        console.log('trav.Squares', traversedSquares)
       }
     } else if (eastWest < 0) {
       //west
-      console.log('inside west', eastWest)
-      for (let i = 0; i > eastWest; i--) {
+      for (let i = 0; i >= eastWest; i--) {
         let thisSquare = {
           thisRow: playerRow,
           thisColumn: parseInt(playerColumn) + i,
         }
         traversedSquares.push(thisSquare)
-        console.log('trav.Squares', traversedSquares)
       }
     }
-    let isBlocked = checkTraversedSquares(traversedSquares)
-    console.log(isBlocked)
+    isBlocked = checkTraversedSquares(traversedSquares)
     return isBlocked;
-    // checkTraversedSquares(traversedSquares)
   } else {
-    console.log('moving incorrectly: more than 3 squares or vertically')
+    console.log('moving incorrectly: more than 3 squares or diagonally')
   }
 
 }
 
 function checkTraversedSquares(traversedSquares) {
-  let isBlocked = false
-  console.log(traversedSquares.length)
+  let isBlocked = true
   for (let i = 0; i < traversedSquares.length; i++) {
-    console.log(traversedSquares[i])
-    console.log('$(`[data-row="${traversedSquares[i].thisRow}"][data-column="${traversedSquares[i].thisColumn}"]`) ', $(`[data-row="${traversedSquares[i].thisRow}"][data-column="${traversedSquares[i].thisColumn}"]`) );
-    // console.log('`["data-row="${traversedSquares[i].thisRow}"]["data-column="${traversedSquares[i].thisColumn}"]`', `["data-row="${traversedSquares[i].thisRow}"]["data-column="${traversedSquares[i].thisColumn}"]`)
-    if ( $(`[data-row="${traversedSquares[i].thisRow}"][data-column="${traversedSquares[i].thisColumn}"]`).hasClass('blocked') ) {
-      isBlocked = true
+    if ($(`[data-row= "${traversedSquares[i].thisRow}"][data-column="${traversedSquares[i].thisColumn}"]`).hasClass('blocked')) {
+
+      isBlocked = false
       return isBlocked
     }
   }
   return isBlocked
 }
-
-
-
-
-//function to check this array for blocked squares
-// let isBlocked = false;
-// for(/*iterate over traversedarray*/) {
-//   $(["data-row"+traversedarray[i]]["data-column"]).hasClass(''blocked')
-//   isBlocked = true
-// }
-
-//return isBlocked
-
-//Inside of Player moves function, run funciton to check blocked squares, if and only if it returns false , do you run the code that actually switches the location of the player in the HTML and player object.
-
-//if blocked, no moves
-//else move
 
 function checkWin() {
   let win = false
@@ -364,36 +307,25 @@ function switchPlayers() {
 }
 
 //check if target square containes a weapon and if so adds it to the weapon key in player object
-// function collectWeapon($clickedSquare, player) {
-//   if ($clickedSquare.hasClass('hammer')) {
-//     player.weapon = 'hammer'
-//     console.log('player weapon', player)
-//     $clickedSquare.removeClass('hammer').addClass('free')
-//     console.log('player colltects weapon', player)
-//   } else {
-//     console.log('no weapon')
-//   }
-// }
+function collectWeapon($clickedSquare, player) {
+  if ($clickedSquare.hasClass('hammer')) {
+    player.weapon = 'hammer'
+    // console.log('player weapon', player)
+    $clickedSquare.removeClass('hammer').addClass('free')
+    // console.log('player colltects weapon', player)
+  }
+}
 
-// function startFight($clickedSquare, player) {
-//   if (player.name === 'playerOne') {
-//     activePlayer = playerOne
-//     passivePlayer = playerTwo
-//     console.log(activePlayer)
-//   } else {
-//     activePlayer = playerTwo
-//     passivePlayer = playerOne
-//     console.log(activePlayer)
-//   }
-//   console.log($clickedSquare)
-//   if ($clickedSquare.hasClass('free') || $clickedSquare.hasClass('hammer')) {
-//     console.log('no fight')
-//     return
-//   } else {
-//     console.log(activePlayer, 'starts fight')
-//     return
-//   }
-//}
+function startFight($clickedSquare) {
+  if ($clickedSquare.hasClass('free') || $clickedSquare.hasClass('hammer')) {
+    console.log('no fight')
+    return
+  } else {
+    console.log(activePlayer.name, 'starts fight')
+    // render fight arena
+    return
+  }
+}
 
 createSquaresArray()
 renderBoard()
