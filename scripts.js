@@ -150,8 +150,6 @@ function movePlayer($this) {
   } else {
     alert('You can\'t jump blocked squares')
   }
-
-
 }
 
 // -------------  helper functions -------------
@@ -273,7 +271,6 @@ function checkTraversedSquares(traversedSquares) {
   let isBlocked = true
   for (let i = 0; i < traversedSquares.length; i++) {
     if ($(`[data-row= "${traversedSquares[i].thisRow}"][data-column="${traversedSquares[i].thisColumn}"]`).hasClass('blocked')) {
-
       isBlocked = false
       return isBlocked
     }
@@ -310,19 +307,20 @@ function switchPlayers() {
 function collectWeapon($clickedSquare, player) {
   if ($clickedSquare.hasClass('hammer')) {
     player.weapon = 'hammer'
-    // console.log('player weapon', player)
     $clickedSquare.removeClass('hammer').addClass('free')
-    // console.log('player colltects weapon', player)
   }
 }
 
 function startFight($clickedSquare) {
+
   if ($clickedSquare.hasClass('free') || $clickedSquare.hasClass('hammer')) {
     console.log('no fight')
     return
   } else {
+    // const body = document.querySelector('.grid-container')
     console.log(activePlayer.name, 'starts fight')
     // render fight arena
+    //body.insertAdjacentHTML('afterbegin', '<div class="fight_arena">Fight<div>')
     return
   }
 }
