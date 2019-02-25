@@ -199,7 +199,9 @@ function checkIfPathFree(square) {
       return true
     } else if (
       (squaresArray.find(isNorth).state === 'playerOne') ||
-      (squaresArray.find(isSouth) === 'playerTwo')) {
+      (squaresArray.find(isSouth).state === 'playerOne') ||
+      (squaresArray.find(isEast).state === 'playerOne') ||
+      (squaresArray.find(isWest).state === 'playerOne')) {
       return true
     } else {
       return false
@@ -318,11 +320,15 @@ function checkIfFight() {
   let playerTwoRow = playerTwo.position.row
   let playerOneColumn = playerOne.position.column
   let playerTwoColumn = playerTwo.position.column
+  console.log(playerOne.position)
+  console.log(playerTwo.position)
 
   let conditionOne = (playerOneRow === playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
   let conditionTwo = (playerOneRow === playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
   let conditionThree = (playerOneColumn === playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
   let conditionFour = (playerOneColumn === playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
+
+  console.log(conditionOne, conditionTwo, conditionThree, conditionFour)
 
   if (conditionOne || conditionTwo || conditionThree || conditionFour) {
     return true
@@ -344,7 +350,7 @@ function fight() {
   let activePlayerWeapon = activePlayer.weapon
   let passivePlayerWeapon = passivePlayer.weapon
   let passivePlayerChoice = document.querySelector('form')
-  console.log(passivePlayerChoice.value)
+
 
   if (passivePlayerChoice === 'defend') {
     passivePlayer.healthscore -= (activePlayerWeapon.power * 0.5)
@@ -364,7 +370,7 @@ function renderFightArena() {
   let playerView
   const choiceForm = `<form action="choose">
     <button class="defend" value="defend">defend</button> <button class="attack" value="attack">attack</button>
-  </form>'`
+  </form>`
 
   console.log('fight')
   if (activePlayer === playerOne) {
