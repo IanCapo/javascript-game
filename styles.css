@@ -96,3 +96,7 @@ button.attack {
 button.defend {
   background-color: darkslategray;
 }
+
+.hidden {
+  display: none;
+}
