@@ -1,77 +1,66 @@
-const squaresArray = []
+const squaresArray = createSquaresArray()
 
 class Player {
-  constructor(name, image, healthscore, weapon, position) {
+  constructor(name, image, healthscore, weapon) {
     this.name = name
     this.image = image
     this.healthscore = healthscore
     this.weapon = weapon
-    this.position = position
-  }
-
-  placePlayer() {
-    let randomSquare = createRandomNumber(0, squaresArray.length - 1)
-    let square = squaresArray[randomSquare]
-
-    const edge =
-      square.row === 1 ||
-      square.column === 1 ||
-      square.row === 10 ||
-      square.column === 10
-
-    if (square.state != 'free' || edge) {
-      this.placePlayer()
-    } else if (!checkIfPathFree(square)) {
-      square.state = this.name
-      this.position = { row: square.row, column: square.column }
-    }
   }
 }
 
 class Weapon {
-  constructor(name, image, power, position) {
-    ; (this.name = name),
-      (this.power = power),
-      (this.position = position),
-      (this.image = image)
-  }
-
-  placeWeapon() {
-    let randomSquare = createRandomNumber(0, squaresArray.length - 1)
-    let square = squaresArray[randomSquare]
-
-    const edge =
-      square.row === 1 ||
-      square.column === 1 ||
-      square.row === 10 ||
-      square.column === 10
-
-    if (square.state != 'free' || edge) {
-      this.placeWeapon()
-    } else if (!checkIfPathFree(square)) {
-      square.state = this.name
-      this.position = square
-    }
+  constructor(name, image, power) {
+    this.name = name,
+      this.power = power,
+      this.image = image
   }
 }
 
-const playerOne = new Player('playerOne', 'image', 100, 'knife')
-const playerTwo = new Player('playerTwo', 'image', 100, 'knife')
+
 const hammer = new Weapon('hammer', 'image', 10)
-const gun = new Weapon('gun', 'image', 80)
-const knife = new Weapon('knife', 'image', 50)
+const gun = new Weapon('gun', 'image', 40)
+const knife = new Weapon('knife', 'image', 30)
+const lasersword = new Weapon('lasersword', 'image', 60)
+const playerOne = new Player('playerOne', 'image', 100, hammer)
+const playerTwo = new Player('playerTwo', 'image', 100, hammer)
 
 let activePlayer = playerOne
+
 
 /* ---------------------------------- Functions ------------------------------------ */
 
 //Create an array of object with coordinates
 function createSquaresArray() {
+  let squaresArray = []
   for (let x = 1; x < 11; x++) {
     for (let y = 1; y < 11; y++) {
       let square = { row: x, column: y, state: 'free' }
       squaresArray.push(square)
     }
+  }
+  return squaresArray
+}
+
+// combine placeItem and placeWeapon => placeItem
+// 
+function placeItem(item) {
+  let randomSquare = createRandomNumber(0, squaresArray.length - 1)
+  let square = squaresArray[randomSquare]
+
+  const edge =
+    square.row === 1 ||
+    square.column === 1 ||
+    square.row === 10 ||
+    square.column === 10
+
+  if (square.state != 'free' || edge) {
+    placeItem(item)
+  } else if (!checkIfPathFree(square)) {
+    square.state = item.name
+    item.position = { row: square.row, column: square.column }
+  } else {
+    placeItem(item)
   }
 }
 
@@ -100,12 +89,12 @@ function blockSquares() {
 
 function renderBoard() {
   blockSquares()
-  playerOne.placePlayer()
-  playerTwo.placePlayer()
-  hammer.placeWeapon()
-  hammer.placeWeapon()
-  hammer.placeWeapon()
-  hammer.placeWeapon()
+  placeItem(playerOne)
+  placeItem(playerTwo)
+  placeItem(gun)
+  placeItem(hammer)
+  placeItem(knife)
+  placeItem(lasersword)
 
   const gridContainer = document.getElementById('game')
   squaresArray.map(obj => {
@@ -142,9 +131,12 @@ function movePlayer($this) {
       row: $this[0].attributes['data-row'].value,
       column: $this[0].attributes['data-column'].value,
     }
-    startFight($this)
+
     collectWeapon($this, activePlayer)
-    checkWin()
+    if (checkIfFight()) {
+      fight()
+      checkWin()
+    }
     switchPlayers()
 
   } else {
@@ -204,6 +196,10 @@ function checkIfPathFree(square) {
           squaresArray.find(isWest).state === 'blocked' &&
           squaresArray.find(isEast).state === 'blocked'))
     ) {
+      return true
+    } else if (
+      (squaresArray.find(isNorth).state === 'playerOne') ||
+      (squaresArray.find(isSouth) === 'playerTwo')) {
       return true
     } else {
       return false
@@ -282,14 +278,10 @@ function checkWin() {
   let win = false
   let lost = false
 
-  if (win) {
-    console.log('wins')
-    return 'win'
-  }
-
-  if (lost) {
-    console.log('lost')
-    return 'lost'
+  if (playerOne.healthscore <= 0) {
+    console.log('playerOne lost')
+  } else if (playerTwo.healthscore <= 0) {
+    console.log('playerTwo lost')
   }
 }
 
@@ -304,26 +296,111 @@ function switchPlayers() {
 }
 
 //check if target square containes a weapon and if so adds it to the weapon key in player object
-function collectWeapon($clickedSquare, player) {
+function collectWeapon($clickedSquare) {
+  console.log($clickedSquare)
   if ($clickedSquare.hasClass('hammer')) {
-    player.weapon = 'hammer'
-    $clickedSquare.removeClass('hammer').addClass('free')
+    activePlayer.weapon = hammer
+    $clickedSquare.removeClass('hammer').addClass(activePlayer.name)
+  } else if ($clickedSquare.hasClass('gun')) {
+    activePlayer.weapon = gun
+    $clickedSquare.removeClass('gun').addClass(activePlayer.name)
+  } else if ($clickedSquare.hasClass('lasersword')) {
+    activePlayer.weapon = lasersword
+    $clickedSquare.removeClass('lasersword').addClass(activePlayer.name)
+  } else if ($clickedSquare.hasClass('knife')) {
+    activePlayer.weapon = knife
+    $clickedSquare.removeClass('knife').addClass(activePlayer.name)
   }
 }
 
-function startFight($clickedSquare) {
+function checkIfFight() {
+  let playerOneRow = playerOne.position.row
+  let playerTwoRow = playerTwo.position.row
+  let playerOneColumn = playerOne.position.column
+  let playerTwoColumn = playerTwo.position.column
 
-  if ($clickedSquare.hasClass('free') || $clickedSquare.hasClass('hammer')) {
-    console.log('no fight')
-    return
+  let conditionOne = (playerOneRow === playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
+  let conditionTwo = (playerOneRow === playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
+  let conditionThree = (playerOneColumn === playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
+  let conditionFour = (playerOneColumn === playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
+
+  if (conditionOne || conditionTwo || conditionThree || conditionFour) {
+    return true
   } else {
-    // const body = document.querySelector('.grid-container')
-    console.log(activePlayer.name, 'starts fight')
-    // render fight arena
-    //body.insertAdjacentHTML('afterbegin', '<div class="fight_arena">Fight<div>')
-    return
+    return false
   }
 }
+
+function fight() {
+  renderFightArena()
+  let passivePlayer
+
+  if (activePlayer === playerOne) {
+    passivePlayer = playerTwo
+  } else {
+    passivePlayer = playerOne
+  }
+
+  let activePlayerWeapon = activePlayer.weapon
+  let passivePlayerWeapon = passivePlayer.weapon
+  let passivePlayerChoice = document.querySelector('form')
+  console.log(passivePlayerChoice.value)
+
+  if (passivePlayerChoice === 'defend') {
+    passivePlayer.healthscore -= (activePlayerWeapon.power * 0.5)
+  } else {
+    passivePlayer.healthscore -= activePlayerWeapon.power
+  }
+
+  activePlayer.healthscore -= passivePlayerWeapon.power
+
+  console.log(activePlayer)
+  console.log(passivePlayer)
+
+}
+
+function renderFightArena() {
+  const board = document.querySelector('main')
+  let playerView
+  const choiceForm = `<form action="choose">
+    <button class="defend" value="defend">defend</button> <button class="attack" value="attack">attack</button>
+  </form>'`
+
+  console.log('fight')
+  if (activePlayer === playerOne) {
+    console.log('playerOne attacks')
+    playerView =
+      `<div class="fight-view ${playerOne.name}_fight">
+        <h2>Player One</h2>
+        <p>weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
+        <p>health score: ${playerOne.healthscore}</p>
+      </div>
+      <div class="fight-view playerTwo_fight">
+        <h2>Player Two</h2>
+        ${choiceForm}
+        <p>weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
+        <p>health score: ${playerTwo.healthscore}</p>
+      </div>`
+  } else {
+    console.log('playerTwo attacks')
+    playerView =
+      `<div class="fight-view ${playerOne.name}_fight">
+        <h2>Player One</h2>
+         ${choiceForm}
+        <p>weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
+        <p>health score: ${playerOne.healthscore}</p>
+      </div>
+      <div class="fight-view playerTwo_fight">
+        <h2>Player Two</h2>
+        <p>weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
+        <p>health score: ${playerTwo.healthscore}</p>
+      </div>`
+
+  }
+  board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${playerView}</div>`)
+}
+
 
 createSquaresArray()
 renderBoard()
+
