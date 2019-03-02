@@ -1,6 +1,23 @@
-const squaresArray = createSquaresArray()
-const board = document.querySelector('main')
-let fightArena = ''
+// PSEUDOCODE
+// page loads - game set up and reset
+  //game grid loads
+  //barriers are placed
+  //weapons are placed
+  //players are placed
+//player one moves
+  //pick up weapon?
+    //if yes, drop-off old weapon
+  //check for fight?
+    //if fight,
+      //win/loss?
+        // if loss, loss message - GAME OVER
+        //if win, win message - GAME OVER
+      //switch players
+//player two moves....
+
+//RENDERING TO THE DOM INFO ABOUT THE PLAYERS
+
+
 
 class Player {
   constructor(name, image, healthscore, weapon) {
@@ -26,66 +43,13 @@ const lasersword = new Weapon('lasersword', 'image', 60)
 const playerOne = new Player('playerOne', 'image', 100, hammer)
 const playerTwo = new Player('playerTwo', 'image', 100, hammer)
 
+
+const squaresArray = createSquaresArray()
+const board = document.querySelector('main')
+let fightArena = ''
 let activePlayer = playerOne
-
-/* ---------------------------------- Functions ------------------------------------ */
-
-//Create an array of object with coordinates
-function createSquaresArray() {
-  let squaresArray = []
-  for (let x = 1; x < 11; x++) {
-    for (let y = 1; y < 11; y++) {
-      let square = { row: x, column: y, state: 'free' }
-      squaresArray.push(square)
-    }
-  }
-  return squaresArray
-}
-
-// combine placeItem and placeWeapon => placeItem
-// 
-function placeItem(item) {
-  let randomSquare = createRandomNumber(0, squaresArray.length - 1)
-  let square = squaresArray[randomSquare]
-
-  const edge =
-    square.row === 1 ||
-    square.column === 1 ||
-    square.row === 10 ||
-    square.column === 10
-
-  if (square.state != 'free' || edge) {
-    placeItem(item)
-  } else if (!checkIfPathFree(square)) {
-    square.state = item.name
-    item.position = { row: square.row, column: square.column }
-  } else {
-    placeItem(item)
-  }
-}
-
 // Use objects from SquaresArray to render the board
 let squaresCounter = createRandomNumber(10, 20)
-
-function blockSquares() {
-  let num = createRandomNumber(0, squaresArray.length - 1)
-  let square = squaresArray[num]
-  let check = checkIfPathFree(square)
-  let checkAll = squaresArray.map(square => checkIfPathFree(square))
-
-  if (squaresCounter >= 1) {
-    if (square.state === 'blocked') {
-      blockSquares()
-    } else if (check) {
-      blockSquares()
-    } else if (checkAll) {
-      square.state = 'blocked'
-      squaresCounter--
-      blockSquares()
-    }
-  } else {
-  }
-}
 
 function renderBoard() {
   blockSquares()
@@ -110,10 +74,74 @@ function renderBoard() {
   })
 }
 
+function blockSquares() {
+  let num = createRandomNumber(0, squaresArray.length - 1)
+  let square = squaresArray[num]
+  let check = checkIfPathFree(square)
+  let checkAll = squaresArray.map(square => checkIfPathFree(square))
+
+  if (squaresCounter >= 1) {
+    if (square.state === 'blocked') {
+      blockSquares()
+    } else if (check) {
+      blockSquares()
+    } else if (checkAll) {
+      square.state = 'blocked'
+      squaresCounter--
+      blockSquares()
+    }
+  } else {
+  }
+}
+
+// combine placeItem and placeWeapon => placeItem
+//
+function placeItem(item) {
+  let randomSquare = createRandomNumber(0, squaresArray.length - 1)
+  let square = squaresArray[randomSquare]
+
+  const edge =
+    square.row === 1 ||
+    square.column === 1 ||
+    square.row === 10 ||
+    square.column === 10
+
+  if (square.state != 'free' || edge) {
+    placeItem(item)
+  } else if (!checkIfPathFree(square)) {
+    square.state = item.name
+    item.position = { row: square.row, column: square.column }
+  } else {
+    placeItem(item)
+  }
+}
+
+
+/* ---------------------------------- Functions ------------------------------------ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Eventlistener in grid-items
 $('.grid-container').on('click', '.grid-item', function () {
   movePlayer($(this))
 })
+
+
+
+
+
 
 
 //MOVE PLAYER
@@ -143,6 +171,18 @@ function movePlayer($this) {
 }
 
 // -------------  helper functions -------------
+
+//Create an array of object with coordinates
+function createSquaresArray() {
+  let squaresArray = []
+  for (let x = 1; x < 11; x++) {
+    for (let y = 1; y < 11; y++) {
+      let square = { row: x, column: y, state: 'free' }
+      squaresArray.push(square)
+    }
+  }
+  return squaresArray
+}
 
 function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
@@ -443,4 +483,3 @@ function renderFightArena(isFirstFight) {
 
 createSquaresArray()
 renderBoard()
-
