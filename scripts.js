@@ -44,7 +44,7 @@ function createSquaresArray() {
 }
 
 // combine placeItem and placeWeapon => placeItem
-// 
+//
 function placeItem(item) {
   let randomSquare = createRandomNumber(0, squaresArray.length - 1)
   let square = squaresArray[randomSquare]
@@ -133,13 +133,164 @@ function movePlayer($this) {
     }
     collectWeapon($this)
     if (checkIfFight()) {
-      playerChoice()
+      playersFight()
     }
     switchPlayers()
   } else {
     alert('You can\'t jump blocked squares')
   }
 }
+
+//FIGHT LOGIC
+function playersFight() {
+  fight()
+  updateFightArena()
+  checkWin()
+}
+
+function checkIfFight() {
+  let playerOneRow = playerOne.position.row
+  let playerTwoRow = playerTwo.position.row
+  let playerOneColumn = playerOne.position.column
+  let playerTwoColumn = playerTwo.position.column
+
+  let conditionOne = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
+  let conditionTwo = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
+  let conditionThree = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
+  let conditionFour = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
+
+  let isFirstFight = (playerOne.healthscore === 100) && (playerTwo.healthscore === 100)
+
+  if (conditionOne || conditionTwo || conditionThree || conditionFour) {
+    renderFightArena(isFirstFight)
+    return true
+  } else {
+    return false
+  }
+}
+
+function renderFightArena(isFirstFight) {
+  switchPlayers()
+  let playerView
+  const choiceForm = `<form id="choiceForm" action="input">
+    <button name="defendButton" type="submit" class="defend" value="defend">defend</button>
+     <button name="attackButton "type="submit" class="attack" value="attack">attack</button>
+  </form>`
+
+
+  playerView =
+    `<div class="fight-view ${playerOne.name}_fight">
+        <h2>Player One</h2>
+        <p class="js-pOneWeapon">weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
+        <p class="js-pOneHealth">health score: ${playerOne.healthscore}</p>
+      </div>
+    <div class="choiceForm">
+      <p>${activePlayer.name} choose:</p>
+      ${choiceForm}
+    </div>
+      <div class="fight-view playerTwo_fight">
+        <h2>Player Two</h2>
+        <p class="js-pTwoWeapon">weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
+        <p class="js-pTwoHealth">health score: ${playerTwo.healthscore}</p>
+      </div>`
+
+  console.log(isFirstFight)
+  if (isFirstFight === true) {
+    board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${playerView}</div>`)
+    fightArena = document.querySelector('.fight_arena')
+  } else {
+    updateFightArena()
+    fightArena.classList.remove('hidden')
+
+  }
+}
+
+function playerChoice() {
+  switchPlayers()
+  form = document.getElementById('choiceForm')
+  $('.fight_arena').on('click', 'button', function () {
+    event.preventDefault()
+    let playersChoice = this.value
+    console.log('playersChoice', playersChoice);
+    return playersChoice
+    // fight(playerChoice)
+  })
+}
+
+function fight() {
+
+  let playersChoice = playerChoice()
+
+  console.log('playersChoice', playersChoice);
+  console.log('fight is beeing executed')
+
+  let defendingPlayer
+  let attackingPlayer
+  let passivePlayerChoice = playerChoice
+
+  if (activePlayer === playerOne) {
+    defendingPlayer = playerOne
+    attackingPlayer = playerTwo
+  } else {
+    defendingPlayer = playerTwo
+    attackingPlayer = playerOne
+  }
+
+  attackingPlayerWeapon = attackingPlayer.weapon.power
+  defendingPlayerWeapon = defendingPlayer.weapon.power
+
+  console.log('attacking player, weapon', attackingPlayerWeapon)
+  console.log('defending player, weapon', defendingPlayerWeapon)
+
+  if (passivePlayerChoice === 'defend') {
+    defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
+  } else {
+    defendingPlayer.healthscore -= attackingPlayerWeapon
+  }
+
+  attackingPlayer.healthscore -= defendingPlayerWeapon
+
+}
+
+function updateFightArena() {
+  const jsOneWeapon = document.querySelector('.js-pOneWeapon')
+  const jsTwoWeapon = document.querySelector('.js-pTwoWeapon')
+  const jsOne = document.querySelector('.js-pOneHealth')
+  const jsTwo = document.querySelector('.js-pTwoHealth')
+
+  jsOne.innerHTML = `healthscore: ${playerOne.healthscore}`
+  jsTwo.innerHTML = `healthscore: ${playerTwo.healthscore}`
+  jsOneWeapon.innerHTML = `weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}`
+  jsTwoWeapon.innerHTML = `weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}`
+}
+
+function checkWin() {
+
+  console.log('pOne', playerOne.healthscore)
+  console.log('pTwo', playerTwo.healthscore)
+
+  if (playerOne.healthscore <= 0) {
+    board.innerHTML = `
+    <p>Player Two won</p>
+    <p>Player One lost</p>`
+
+  } else if (playerTwo.healthscore <= 0) {
+    board.innerHTML = `
+    <p>Player One won</p>
+    <p>Player Two lost</p>`
+
+  } else {
+    setTimeout(() =>
+      fightArena.classList.add('hidden'), 3000)
+  }
+}
+
+
+
+
+
+
+
 
 // -------------  helper functions -------------
 
@@ -273,25 +424,7 @@ function checkTraversedSquares(traversedSquares) {
 }
 
 
-function checkWin() {
-  console.log('pOne', playerOne.healthscore)
-  console.log('pTwo', playerTwo.healthscore)
 
-  if (playerOne.healthscore <= 0) {
-    board.innerHTML = `
-    <p>Player Two won</p>
-    <p>Player One lost</p>`
-
-  } else if (playerTwo.healthscore <= 0) {
-    board.innerHTML = `
-    <p>Player One won</p>
-    <p>Player Two lost</p>`
-
-  } else {
-    setTimeout(() =>
-      fightArena.classList.add('hidden'), 3000)
-  }
-}
 
 function switchPlayers() {
   if (activePlayer === playerOne) {
@@ -320,122 +453,17 @@ function collectWeapon($clickedSquare) {
   }
 }
 
-function updateFightArena() {
-  const jsOneWeapon = document.querySelector('.js-pOneWeapon')
-  const jsTwoWeapon = document.querySelector('.js-pTwoWeapon')
-  const jsOne = document.querySelector('.js-pOneHealth')
-  const jsTwo = document.querySelector('.js-pTwoHealth')
-
-  jsOne.innerHTML = `healthscore: ${playerOne.healthscore}`
-  jsTwo.innerHTML = `healthscore: ${playerTwo.healthscore}`
-  jsOneWeapon.innerHTML = `weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}`
-  jsTwoWeapon.innerHTML = `weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}`
-}
-
-function checkIfFight() {
-  let playerOneRow = playerOne.position.row
-  let playerTwoRow = playerTwo.position.row
-  let playerOneColumn = playerOne.position.column
-  let playerTwoColumn = playerTwo.position.column
-
-  let conditionOne = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
-  let conditionTwo = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
-  let conditionThree = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
-  let conditionFour = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
-
-  let isFirstFight = (playerOne.healthscore === 100) && (playerTwo.healthscore === 100)
-
-  if (conditionOne || conditionTwo || conditionThree || conditionFour) {
-    renderFightArena(isFirstFight)
-    return true
-  } else {
-    return false
-  }
-}
 
 
-function playerChoice() {
-  switchPlayers()
-  form = document.getElementById('choiceForm')
-  $('.fight_arena').on('click', 'button', function () {
-    let playerChoice
-    playerChoice = this.value
-    fight(playerChoice)
-    event.preventDefault()
-
-  })
-}
-
-function fight(playerChoice) {
-  console.log('fight is beeing executed')
-  let defendingPlayer
-  let attackingPlayer
-  let passivePlayerChoice = playerChoice
-
-  if (activePlayer === playerOne) {
-    defendingPlayer = playerOne
-    attackingPlayer = playerTwo
-  } else {
-    defendingPlayer = playerTwo
-    attackingPlayer = playerOne
-  }
-
-  attackingPlayerWeapon = attackingPlayer.weapon.power
-  defendingPlayerWeapon = defendingPlayer.weapon.power
-
-  console.log('attacking player, weapon', attackingPlayerWeapon)
-  console.log('defending player, weapon', defendingPlayerWeapon)
-
-  if (passivePlayerChoice === 'defend') {
-    defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
-  } else {
-    defendingPlayer.healthscore -= attackingPlayerWeapon.power
-  }
-
-  attackingPlayer.healthscore -= defendingPlayerWeapon
-
-  updateFightArena()
-  checkWin()
-
-}
-
-function renderFightArena(isFirstFight) {
-  switchPlayers()
-  let playerView
-  const choiceForm = `<form id="choiceForm" action="input">
-    <button name="defendButton" type="submit" class="defend" value="defend">defend</button>
-     <button name="attackButton "type="submit" class="attack" value="attack">attack</button>
-  </form>`
 
 
-  playerView =
-    `<div class="fight-view ${playerOne.name}_fight">
-        <h2>Player One</h2>
-        <p class="js-pOneWeapon">weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
-        <p class="js-pOneHealth">health score: ${playerOne.healthscore}</p>
-      </div>
-    <div class="choiceForm">
-      <p>${activePlayer.name} choose:</p>
-      ${choiceForm}
-    </div>
-      <div class="fight-view playerTwo_fight">
-        <h2>Player Two</h2>
-        <p class="js-pTwoWeapon">weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
-        <p class="js-pTwoHealth">health score: ${playerTwo.healthscore}</p>
-      </div>`
 
-  console.log(isFirstFight)
-  if (isFirstFight === true) {
-    board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${playerView}</div>`)
-    fightArena = document.querySelector('.fight_arena')
-  } else {
-    updateFightArena()
-    fightArena.classList.remove('hidden')
 
-  }
-}
+
+
+
+
 
 
 createSquaresArray()
 renderBoard()
-
