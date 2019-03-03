@@ -1,6 +1,7 @@
 const squaresArray = createSquaresArray()
 const board = document.querySelector('main')
 let fightArena = ''
+let form = ''
 
 class Player {
   constructor(name, image, healthscore, weapon) {
@@ -115,7 +116,6 @@ $('.grid-container').on('click', '.grid-item', function () {
   movePlayer($(this))
 })
 
-
 //MOVE PLAYER
 function movePlayer($this) {
   let squareCheck = createTraversedSquares($this)
@@ -131,15 +131,14 @@ function movePlayer($this) {
       row: $this[0].attributes['data-row'].value,
       column: $this[0].attributes['data-column'].value,
     }
+    collectWeapon($this)
+    if (checkIfFight()) {
+      playerChoice()
+    }
+    switchPlayers()
   } else {
     alert('You can\'t jump blocked squares')
   }
-
-  collectWeapon($this)
-  if (checkIfFight()) {
-    playerChoice()
-  }
-  switchPlayers()
 }
 
 // -------------  helper functions -------------
@@ -319,7 +318,6 @@ function collectWeapon($clickedSquare) {
     activePlayer.weapon = knife
     $clickedSquare.removeClass('knife').addClass(activePlayer.name)
   }
-
 }
 
 function updateFightArena() {
@@ -357,16 +355,19 @@ function checkIfFight() {
 
 
 function playerChoice() {
+  switchPlayers()
+  form = document.getElementById('choiceForm')
   $('.fight_arena').on('click', 'button', function () {
     let playerChoice
     playerChoice = this.value
     fight(playerChoice)
-    // switchPlayers()
     event.preventDefault()
+
   })
 }
 
 function fight(playerChoice) {
+  console.log('fight is beeing executed')
   let defendingPlayer
   let attackingPlayer
   let passivePlayerChoice = playerChoice
@@ -379,57 +380,50 @@ function fight(playerChoice) {
     attackingPlayer = playerOne
   }
 
-  attackingPlayerWeapon = attackingPlayer.weapon
-  defendingPlayerWeapon = defendingPlayer.weapon
+  attackingPlayerWeapon = attackingPlayer.weapon.power
+  defendingPlayerWeapon = defendingPlayer.weapon.power
+
+  console.log('attacking player, weapon', attackingPlayerWeapon)
+  console.log('defending player, weapon', defendingPlayerWeapon)
 
   if (passivePlayerChoice === 'defend') {
-    defendingPlayer.healthscore -= (attackingPlayerWeapon.power * 0.5)
+    defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
   } else {
     defendingPlayer.healthscore -= attackingPlayerWeapon.power
   }
 
-  attackingPlayer.healthscore -= defendingPlayerWeapon.power
+  attackingPlayer.healthscore -= defendingPlayerWeapon
 
   updateFightArena()
   checkWin()
-  //switchPlayers()
+
 }
 
 function renderFightArena(isFirstFight) {
+  switchPlayers()
   let playerView
   const choiceForm = `<form id="choiceForm" action="input">
     <button name="defendButton" type="submit" class="defend" value="defend">defend</button>
      <button name="attackButton "type="submit" class="attack" value="attack">attack</button>
   </form>`
 
-  if (activePlayer === playerOne) {
-    playerView =
-      `<div class="fight-view ${playerOne.name}_fight">
+
+  playerView =
+    `<div class="fight-view ${playerOne.name}_fight">
         <h2>Player One</h2>
         <p class="js-pOneWeapon">weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
         <p class="js-pOneHealth">health score: ${playerOne.healthscore}</p>
       </div>
-      <div class="fight-view playerTwo_fight">
-        <h2>Player Two</h2>
-        ${choiceForm}
-        <p class="js-pTwoWeapon">weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
-        <p class="js-pTwoHealth">health score: ${playerTwo.healthscore}</p>
-      </div>`
-  } else {
-    playerView =
-      `<div class="fight-view ${playerOne.name}_fight">
-        <h2>Player One</h2>
-         ${choiceForm}
-        <p class="js-pOneWeapon">weapon: ${playerOne.weapon.name}, power: ${playerOne.weapon.power}</p>
-        <p class="js-pOneHealth">health score: ${playerOne.healthscore}</p>
-      </div>
+    <div class="choiceForm">
+      <p>${activePlayer.name} choose:</p>
+      ${choiceForm}
+    </div>
       <div class="fight-view playerTwo_fight">
         <h2>Player Two</h2>
         <p class="js-pTwoWeapon">weapon: ${playerTwo.weapon.name}, power: ${playerTwo.weapon.power}</p>
         <p class="js-pTwoHealth">health score: ${playerTwo.healthscore}</p>
       </div>`
 
-  }
   console.log(isFirstFight)
   if (isFirstFight === true) {
     board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${playerView}</div>`)
@@ -437,6 +431,7 @@ function renderFightArena(isFirstFight) {
   } else {
     updateFightArena()
     fightArena.classList.remove('hidden')
+
   }
 }
 
