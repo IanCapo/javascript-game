@@ -355,14 +355,13 @@ function checkIfFight() {
 
 
 function playerChoice() {
-  switchPlayers()
+  // switchPlayers()
   form = document.getElementById('choiceForm')
   $('.fight_arena').on('click', 'button', function () {
+    event.preventDefault()
     let playerChoice
     playerChoice = this.value
     fight(playerChoice)
-    event.preventDefault()
-
   })
 }
 
@@ -370,7 +369,7 @@ function fight(playerChoice) {
   console.log('fight is beeing executed')
   let defendingPlayer
   let attackingPlayer
-  let passivePlayerChoice = playerChoice
+  let defendingPlayerChoice = playerChoice
 
   if (activePlayer === playerOne) {
     defendingPlayer = playerOne
@@ -386,10 +385,10 @@ function fight(playerChoice) {
   console.log('attacking player, weapon', attackingPlayerWeapon)
   console.log('defending player, weapon', defendingPlayerWeapon)
 
-  if (passivePlayerChoice === 'defend') {
+  if (defendingPlayerChoice === 'defend') {
     defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
   } else {
-    defendingPlayer.healthscore -= attackingPlayerWeapon.power
+    defendingPlayer.healthscore -= attackingPlayerWeapon
   }
 
   attackingPlayer.healthscore -= defendingPlayerWeapon
