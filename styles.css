@@ -1,3 +1,32 @@
+@font-face {
+  font-family: 'simple-line-icons';
+  src: url('../fonts/Simple-Line-Icons.eot?v=2.4.0');
+  src: url('../fonts/Simple-Line-Icons.eot?v=2.4.0#iefix') format('embedded-opentype'), url('../fonts/Simple-Line-Icons.woff2?v=2.4.0') format('woff2'), url('../fonts/Simple-Line-Icons.ttf?v=2.4.0') format('truetype'), url('../fonts/Simple-Line-Icons.woff?v=2.4.0') format('woff'), url('../fonts/Simple-Line-Icons.svg?v=2.4.0#simple-line-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: arial;
+ 
+}
+
+.main {
+  display: flex;
+  justify-content: space-evenly;
+   border: 1px solid darkcyan;
+}
+
+.playerDisplay {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items:center;
+}
+
 .grid-container {
   position: relative;
   display: grid;
@@ -13,52 +42,84 @@
   justify-content: center;
 }
 
+.grid-item.free:hover {
+  background: lightcyan;
+}
+
 .blocked {
   background: crimson;
+  box-shadow: inset 0 0 37px black;
 }
 
 .free {
-  background: rgb(107, 191, 107);
+  background: rgba(0, 173, 255, 0);
+  box-shadow: inset 0 0 5px #23acc2;
 }
 
 .indoubt {
   background: yellow;
 }
 
-.playerOne {
-  background: orange;
-  border: 3px solid black;
-  border-radius: 50px;
+.rocket, .fire, .thunderbolt, .wrench, .playerOne, .playerTwo {
+  font-family: 'simple-line-icons';
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.playerTwo {
-  background: green;
-  border: 3px solid black;
-  border-radius: 50px;
+.rocket, .fire, .thunderbolt, .wrench {
+  border: 1px solid black;
 }
 
-.hammer {
+.wrench {
   background: yellow;
-  border: 3px solid black;
-  border-radius: 15px;
 }
 
-.gun {
-  background: rgb(20, 37, 220);
-  border: 3px solid black;
-  border-radius: 15px;
+.wrench:before {
+  content: "\e052";
 }
 
-.knife {
+.rocket {
+  background: rgb(240, 155, 52);
+}
+
+.rocket:before {
+  content: "\e05c";
+}
+
+.fire {
   background: lightblue;
-  border: 3px solid black;
-  border-radius: 15px;
 }
 
-.lasersword {
+.fire:before {
+  content: "\e01c";
+}
+
+.thunderbolt {
+  background: greenyellow;
+}
+
+.thunderbolt:before {
+  content: "\e020";
+}
+
+.playerOne {
   background: lime;
-  border: 3px solid black;
-  border-radius: 15px;
+}
+.playerTwo {
+  background: rgb(35, 102, 220);
+}
+
+.playerOne:before {
+  content: "\e005";
+} 
+.playerTwo:before {
+  content: "\e005";
 }
 
 .fight_arena {
@@ -67,34 +128,43 @@
   align-items: center;
   justify-content: space-between;
   top: 20%;
-  left: 1%;
   width: 475px;
   height: 200px;
   z-index: 100;
-  background: orange;
+  background: #0b5c69e6;
+  color: #ffffff;
+  border-radius: 3px;
 }
 
 .fight-view {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  height: 100%;
-  width: 40%;
-  border: black 1px solid;
+  align-items: flex-start;
+  padding: 20px;
+  word-break: break-word;
+
 }
 
 .choiceForm {
-  width: 30%;
+  width: 50%;
   height: 100;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 button {
-  border-radius: 2px;
-  color: white;
+  border-radius: 3px;
+  color: #ffffff;
+  font-weight: 600;
   cursor: pointer;
+  padding: 5px 10px;
+}
+
+button:hover {
+  transform: scale(1.1);
 }
 
 button.attack {
