@@ -73,7 +73,8 @@ main {
 }
 
 .rocket, .fire, .thunderbolt, .wrench {
-  border: 1px solid black;
+border: 1px solid #23acc2;
+box-shadow: inset 0px 0px 1px 5px #ffffff;
 }
 
 .wrench {
@@ -110,9 +111,11 @@ main {
 
 .playerOne {
   background: lime;
+  box-shadow: none;
 }
 .playerTwo {
   background: rgb(35, 102, 220);
+  box-shadow: none;
 }
 
 .playerOne:before {
@@ -120,6 +123,19 @@ main {
 } 
 .playerTwo:before {
   content: "\e005";
+}
+
+.playerIcon {
+  align-self: center;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.active {
+  background: #a0ede175;
 }
 
 .fight_arena {
@@ -175,6 +191,20 @@ button.defend {
   background-color: darkslategray;
 }
 
+button.restart {
+  background: greenyellow;
+  color: black;
+}
+
 .hidden {
   display: none;
 }
+
+.win {
+  color: darkgoldenrod;
+  font-size: 20px;
+}
+
+.possible {
+  background: #c7edc7;
+} 

@@ -123,9 +123,8 @@ $('.grid-container').on('click', '.grid-item', function () {
 /* ------- MOVE PLAYER -------- */
 function movePlayer($this) {
   let squareCheck = createTraversedSquares($this)
-
   if (squareCheck) {
-    $(`.${activePlayer.name} `)
+    $(`.grid-item.${activePlayer.name} `)
       .addClass('free')
       .removeClass(`${activePlayer.name} `)
     $this.removeClass('free').addClass(`${activePlayer.name} `)
@@ -136,9 +135,11 @@ function movePlayer($this) {
     }
     collectWeapon($this)
     startFightLogic()
+    // const allPossibleSquares = document.querySelectorAll('.possible')
+    // allPossibleSquares.forEach(square => square.classList.remove('possible'))
     switchPlayers()
   } else {
-    alert('You can\'t jump blocked squares')
+    alert('You can\'t move diagonally or jump blocked squares')
   }
 }
 
@@ -203,7 +204,7 @@ function renderFightArena(isFirstFight) {
   } else {
     defendingPlayer = playerTwo
   }
-  let playerView =
+  let fightArenaHTML =
     `<div class="fight-view">
         <h4>DEFEND</h4>
         <p> lower the attacks impact by 50%</p> 
@@ -221,7 +222,7 @@ function renderFightArena(isFirstFight) {
   </div>`
 
   if (isFirstFight === true) {
-    board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${playerView}</div>`)
+    board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${fightArenaHTML}</div>`)
     fightArena = document.querySelector('.fight_arena')
   } else {
     updateFightArena(defendingPlayer)
@@ -243,10 +244,11 @@ function checkWhoAttacks() {
 // get value from clicked button in order to determine wether the attacked player defends or attacks back
 function playerChoice() {
   form = document.getElementById('choiceForm')
-  $('.fight_arena').on('click', 'button', function () {
+  $('#choiceForm').on('click', 'button', function () {
     event.preventDefault()
     let playerChoice = this.value
     fight(playerChoice)
+    $("#choiceForm").unbind("click")
   })
 }
 
@@ -293,11 +295,11 @@ function updateFightArena(defendingPlayer) {
   }
 
   jsOne.innerHTML = playerOne.healthscore
-  jsTwo.innerHTML = `${playerTwo.healthscore}`
-  jsOneWeapon.innerHTML = `${playerOne.weapon.name}`
-  jsOneWeaponPower.innerHTML = `${playerOne.weapon.power}`
-  jsTwoWeapon.innerHTML = `${playerTwo.weapon.name}`
-  jsTwoWeaponPower.innerHTML = `${playerTwo.weapon.power}`
+  jsTwo.innerHTML = playerTwo.healthscore
+  jsOneWeapon.innerHTML = playerOne.weapon.name
+  jsOneWeaponPower.innerHTML = playerOne.weapon.power
+  jsTwoWeapon.innerHTML = playerTwo.weapon.name
+  jsTwoWeaponPower.innerHTML = playerTwo.weapon.power
 }
 
 function checkWin() {
@@ -306,13 +308,21 @@ function checkWin() {
 
   if (playerOne.healthscore <= 0) {
     board.innerHTML = `
-    <p>Player Two won</p>
-    <p>Player One lost</p>`
+    <p class="win">Player Two won</p>
+    <p>Player One lost</p>
+    <button class="restart">Play again</button>`
+    $('.restart').click(function () {
+      location.reload();
+    });
 
   } else if (playerTwo.healthscore <= 0) {
     board.innerHTML = `
-    <p>Player One won</p>
-    <p>Player Two lost</p>`
+    <p class="win">Player One won</p>
+    <p>Player Two lost</p>
+    <button class="restart">Play again</button>`
+    $('.restart').click(function () {
+      location.reload();
+    });
 
   } else {
     setTimeout(() =>
@@ -321,6 +331,57 @@ function checkWin() {
 }
 
 /* -------------------------  helper functions ------------------------ */
+
+// function showWay() {
+//   let currentRow = activePlayer.position.row
+//   let currentColumn = activePlayer.position.column
+
+//   // show way south
+//   for (let i = 0; i < 3; i++) {
+//     // if square does not have class .free
+//     if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).hasClass('free')) {
+//       console.log(`south ${i} not free`)
+//       // return out of for loop
+//     } else {
+//       $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).addClass('possible')
+//     }
+//     // check next direction
+//   }
+
+//   // show way north
+//   for (let i = 3; i >= 0; i--) {
+//     // if square does not have class .free
+//     if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).hasClass('free')) {
+//       console.log('not free')
+//       // return out of for loop
+//     } else {
+//       $(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).addClass('possible')
+//     }
+//   }
+
+//   // show way west
+//   for (let i = 0; i <= 3; i++) {
+//     // if square does not have class .free
+//     if (!$(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).hasClass('free')) {
+//       console.log('not free')
+//       // return out of for loop
+//     } else {
+//       $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).addClass('possible')
+//     }
+//   }
+
+//   // show way east
+//   for (let i = 3; i >= 0; i--) {
+//     // if square does not have class .free
+//     if (!$(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).hasClass('free')) {
+//       console.log('not free')
+//       // return out of for loop
+//     } else {
+//       $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).addClass('possible')
+//     }
+//   }
+// }
+
 
 function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
@@ -454,9 +515,16 @@ function checkTraversedSquares(traversedSquares) {
 function switchPlayers() {
   if (activePlayer === playerOne) {
     activePlayer = playerTwo
+    // showWay()
+    $('.js-playerTwo_fight').addClass('active')
+    $('.js-playerOne_fight').removeClass('active')
+
     console.log('activePlayer', activePlayer.name)
   } else {
     activePlayer = playerOne
+    // showWay()
+    $('.js-playerOne_fight').addClass('active')
+    $('.js-playerTwo_fight').removeClass('active')
     console.log('activePlayer', activePlayer.name)
   }
 }
