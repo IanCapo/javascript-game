@@ -56,9 +56,9 @@ main {
   box-shadow: inset 0 0 5px #23acc2;
 }
 
-.indoubt {
+/* .indoubt {
   background: yellow;
-}
+} */
 
 .rocket, .fire, .thunderbolt, .wrench, .playerOne, .playerTwo {
   font-family: 'simple-line-icons';
@@ -76,6 +76,10 @@ main {
 border: 1px solid #23acc2;
 box-shadow: inset 0px 0px 1px 5px #ffffff;
 }
+
+.rocket:hover, .fire:hover, .thunderbolt:hover, .wrench:hover {
+  box-shadow: inset 0px 0px 1px 5px lightcyan;
+} 
 
 .wrench {
   background: yellow;
