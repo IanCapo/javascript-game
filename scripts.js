@@ -1,7 +1,259 @@
-const squaresArray = createSquaresArray()
 const board = document.querySelector('main')
 let fightArena = ''
 let form = ''
+
+
+/* --- Create Constructor function called game */
+
+function Game(activePlayer) {
+  this.activePlayer = activePlayer
+  this.squaresCounter = createRandomNumber(10, 20)
+
+  //Create an array of object with coordinates
+  this.createSquaresArray = function () {
+    let squaresArray = []
+    for (let x = 1; x < 11; x++) {
+      for (let y = 1; y < 11; y++) {
+        let square = { row: x, column: y, state: 'free' }
+        squaresArray.push(square)
+      }
+    }
+    return squaresArray
+  }
+
+  // assign blocked-state to random squares
+  this.blockSquares = function () {
+    let num = createRandomNumber(0, squaresArray.length - 1)
+    let square = squaresArray[num]
+    let check = checkIfPathFree(square)
+    let checkAll = squaresArray.map(square => checkIfPathFree(square))
+
+    if (this.squaresCounter >= 1) {
+      if (square.state === 'blocked') {
+        this.blockSquares()
+      } else if (check) {
+        this.blockSquares()
+      } else if (checkAll) {
+        square.state = 'blocked'
+        this.squaresCounter--
+        this.blockSquares()
+      }
+    }
+  }
+
+  // placeItem and placeWeapon
+  this.placeItem = function (item) {
+    let randomSquare = createRandomNumber(0, squaresArray.length - 1)
+    let square = squaresArray[randomSquare]
+
+    const edge =
+      square.row === 1 ||
+      square.column === 1 ||
+      square.row === 10 ||
+      square.column === 10
+
+    if (square.state != 'free' || edge) {
+      this.placeItem(item)
+    } else if (!checkIfPathFree(square)) {
+      square.state = item.name
+      item.position = { row: square.row, column: square.column }
+    } else {
+      this.placeItem(item)
+    }
+  }
+
+  this.renderBoard = function () {
+    // this.createSquaresArray()
+    this.blockSquares()
+    this.placeItem(playerOne)
+    this.placeItem(playerTwo)
+    this.placeItem(rocket)
+    this.placeItem(wrench)
+    this.placeItem(fire)
+    this.placeItem(thunderbolt)
+
+    const gridContainer = document.getElementById('game')
+    squaresArray.map(obj => {
+      let gridItem = document.createElement('div')
+      gridItem.classList.add('grid-item')
+      /*gridItem.innerHTML = `row: ${obj.row} col: ${obj.column}`*/
+      gridItem.classList.add(obj.state)
+
+      gridItem.setAttribute('data-row', obj.row)
+      gridItem.setAttribute('data-column', obj.column)
+
+      gridContainer.appendChild(gridItem)
+    })
+  }
+
+  /* ------- MOVE PLAYER -------- */
+  this.movePlayer = function ($this) {
+    let squareCheck = createTraversedSquares($this)
+    if (squareCheck) {
+      $(`.grid-item.${this.activePlayer.name} `)
+        .addClass('free')
+        .removeClass(`${this.activePlayer.name} `)
+      $this.removeClass('free').addClass(`${this.activePlayer.name} `)
+
+      this.activePlayer.position = {
+        row: $this[0].attributes['data-row'].value,
+        column: $this[0].attributes['data-column'].value,
+      }
+      activePlayer.collectWeapon($this)
+      this.startFightLogic()
+      // const allPossibleSquares = document.querySelectorAll('.possible')
+      // allPossibleSquares.forEach(square => square.classList.remove('possible'))
+      switchPlayers()
+    } else {
+      alert('You can\'t move diagonally or jump blocked squares')
+    }
+  }
+
+  // start fight
+  this.startFightLogic = function () {
+    if (fight.checkIfFight()) {
+      fight.playerChoice()
+    }
+  }
+}
+
+function Fight() {
+  // check if players are on adjacent squares
+  this.checkIfFight = function () {
+    let playerOneRow = playerOne.position.row
+    let playerTwoRow = playerTwo.position.row
+    let playerOneColumn = playerOne.position.column
+    let playerTwoColumn = playerTwo.position.column
+
+    let conditionOne = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
+    let conditionTwo = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
+    let conditionThree = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
+    let conditionFour = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
+
+    let isFirstFight = (playerOne.healthscore === 100) && (playerTwo.healthscore === 100)
+
+    if (conditionOne || conditionTwo || conditionThree || conditionFour) {
+      this.renderFightArena(isFirstFight)
+      return true
+    } else {
+      return false
+    }
+  }
+
+  // Create Pop-up fight arena
+  this.renderFightArena = function (isFirstFight) {
+    this.checkWhoAttacks()
+    let defendingPlayer
+
+    if (playerOne.status === 'defending') {
+      defendingPlayer = playerOne
+    } else {
+      defendingPlayer = playerTwo
+    }
+    let fightArenaHTML =
+      `<div class="fight-view">
+        <h4>DEFEND</h4>
+        <p> lower the attacks impact by 50%</p> 
+      </div>
+    <div class="choiceForm">
+      <h2 class="js-defending-player">${defendingPlayer.name} choose:</h2>
+      <form id = "choiceForm" action = "input" >
+      <button name="defendButton" type="submit" class="defend" value="defend">defend</button>
+      <button name="attackButton " type="submit" class="attack" value="attack">attack</button>
+  </form >
+    </div>
+  <div class="fight-view">
+    <h4>ATTACK</h4>
+       <p> attack back with 100% impact </p>
+  </div>`
+
+    if (isFirstFight === true) {
+      board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${fightArenaHTML}</div>`)
+      fightArena = document.querySelector('.fight_arena')
+    } else {
+      this.updateFightArena(defendingPlayer)
+      fightArena.classList.remove('hidden')
+    }
+  }
+
+  // check which player attacks
+  this.checkWhoAttacks = function () {
+    if (game.activePlayer === playerOne) {
+      playerOne.status = 'attacking'
+      playerTwo.status = 'defending'
+    } else {
+      playerTwo.status = 'attacking'
+      playerOne.status = 'defending'
+    }
+  }
+
+  // get value from clicked button in order to determine wether the attacked player defends or attacks back
+  this.playerChoice = function () {
+    form = document.getElementById('choiceForm')
+    $('#choiceForm').on('click', 'button', function () {
+      event.preventDefault()
+      let playerChoice = this.value
+      fight.fight(playerChoice)
+      $("#choiceForm").unbind("click")
+    })
+  }
+
+  // execute fight after playerChoice
+  this.fight = function (playerChoice) {
+    let defendingPlayer
+    let attackingPlayer
+    let defendingPlayerChoice = playerChoice
+
+    if (playerOne.status === 'defending') {
+      defendingPlayer = playerOne
+      attackingPlayer = playerTwo
+    } else {
+      defendingPlayer = playerTwo
+      attackingPlayer = playerOne
+    }
+
+    attackingPlayerWeapon = attackingPlayer.weapon.power
+    defendingPlayerWeapon = defendingPlayer.weapon.power
+
+    if (defendingPlayerChoice === 'defend') {
+      defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
+    } else {
+      defendingPlayer.healthscore -= attackingPlayerWeapon
+      attackingPlayer.healthscore -= defendingPlayerWeapon
+    }
+    this.updateFightArena(defendingPlayer)
+    checkWin()
+  }
+
+  // Updates values in the fight arena pop-up
+  this.updateFightArena = function (defendingPlayer) {
+    const jsOneWeapon = document.querySelector('.js-pOneWeapon')
+    const jsOneWeaponPower = document.querySelector('.js-pOneWeaponPower')
+    const jsTwoWeapon = document.querySelector('.js-pTwoWeapon')
+    const jsTwoWeaponPower = document.querySelector('.js-pTwoWeaponPower')
+    const jsOne = document.querySelector('.js-pOneHealth')
+    const jsTwo = document.querySelector('.js-pTwoHealth')
+    const jsPlayerChoiceForm = document.querySelector('.js-defending-player')
+
+    if (defendingPlayer) {
+      jsPlayerChoiceForm.innerHTML = `${defendingPlayer.name} choose:`
+    }
+
+    jsOne.innerHTML = playerOne.healthscore
+    jsTwo.innerHTML = playerTwo.healthscore
+    jsOneWeapon.innerHTML = playerOne.weapon.name
+    jsOneWeaponPower.innerHTML = playerOne.weapon.power
+    jsTwoWeapon.innerHTML = playerTwo.weapon.name
+    jsTwoWeaponPower.innerHTML = playerTwo.weapon.power
+  }
+}
+
+$(document).ready(function () {
+  $('.grid-container').on('click', '.grid-item', function () {
+    game.movePlayer($(this))
+  })
+})
+
 
 class Player {
   constructor(name, image, healthscore, weapon) {
@@ -9,6 +261,19 @@ class Player {
     this.image = image
     this.healthscore = healthscore
     this.weapon = weapon
+  }
+
+  //checks if target square contains a weapon and if so adds it to the weapon key in player object
+  collectWeapon = function ($clickedSquare) {
+    if ($clickedSquare.hasClass('wrench')) {
+      weaponSwitch($clickedSquare, 'wrench', wrench)
+    } else if ($clickedSquare.hasClass('rocket')) {
+      weaponSwitch($clickedSquare, 'rocket', rocket)
+    } else if ($clickedSquare.hasClass('thunderbolt')) {
+      weaponSwitch($clickedSquare, 'thunderbolt', thunderbolt)
+    } else if ($clickedSquare.hasClass('fire')) {
+      weaponSwitch($clickedSquare, 'fire', fire)
+    }
   }
 }
 
@@ -27,285 +292,23 @@ const thunderbolt = new Weapon('thunderbolt', 'image', 60)
 const playerOne = new Player('playerOne', 'image', 100, wrench)
 const playerTwo = new Player('playerTwo', 'image', 100, wrench)
 
-let activePlayer = playerOne
+let game = new Game(playerOne)
+let fight = new Fight()
+const squaresArray = game.createSquaresArray()
+game.renderBoard()
 
-/* ---------------------------------- Functions ------------------------------------ */
+/* -------------------------  helper functions ------------------------ */
 
-/* --------------- Create Board ------------------ */
 
-//Create an array of object with coordinates
-function createSquaresArray() {
-  let squaresArray = []
-  for (let x = 1; x < 11; x++) {
-    for (let y = 1; y < 11; y++) {
-      let square = { row: x, column: y, state: 'free' }
-      squaresArray.push(square)
-    }
-  }
-  return squaresArray
-}
-
-// placeItem and placeWeapon
-function placeItem(item) {
-  let randomSquare = createRandomNumber(0, squaresArray.length - 1)
-  let square = squaresArray[randomSquare]
-
-  const edge =
-    square.row === 1 ||
-    square.column === 1 ||
-    square.row === 10 ||
-    square.column === 10
-
-  if (square.state != 'free' || edge) {
-    placeItem(item)
-  } else if (!checkIfPathFree(square)) {
-    square.state = item.name
-    item.position = { row: square.row, column: square.column }
-  } else {
-    placeItem(item)
-  }
-}
-
-// Use objects from SquaresArray to render the board
-let squaresCounter = createRandomNumber(10, 20)
-
-function blockSquares() {
-  let num = createRandomNumber(0, squaresArray.length - 1)
-  let square = squaresArray[num]
-  let check = checkIfPathFree(square)
-  let checkAll = squaresArray.map(square => checkIfPathFree(square))
-
-  if (squaresCounter >= 1) {
-    if (square.state === 'blocked') {
-      blockSquares()
-    } else if (check) {
-      blockSquares()
-    } else if (checkAll) {
-      square.state = 'blocked'
-      squaresCounter--
-      blockSquares()
-    }
-  } else {
-  }
-}
-
-function renderBoard() {
-  createSquaresArray()
-  blockSquares()
-  placeItem(playerOne)
-  placeItem(playerTwo)
-  placeItem(rocket)
-  placeItem(wrench)
-  placeItem(fire)
-  placeItem(thunderbolt)
-
-  const gridContainer = document.getElementById('game')
-  squaresArray.map(obj => {
-    let gridItem = document.createElement('div')
-    gridItem.classList.add('grid-item')
-    /*gridItem.innerHTML = `row: ${obj.row} col: ${obj.column}`*/
-    gridItem.classList.add(obj.state)
-
-    gridItem.setAttribute('data-row', obj.row)
-    gridItem.setAttribute('data-column', obj.column)
-
-    gridContainer.appendChild(gridItem)
-  })
-}
-
-/* Player movement */
-
-// Eventlistener in grid-items for player movement
-$('.grid-container').on('click', '.grid-item', function () {
-  movePlayer($(this))
-})
-
-/* ------- MOVE PLAYER -------- */
-function movePlayer($this) {
-  let squareCheck = createTraversedSquares($this)
-  if (squareCheck) {
-    $(`.grid-item.${activePlayer.name} `)
-      .addClass('free')
-      .removeClass(`${activePlayer.name} `)
-    $this.removeClass('free').addClass(`${activePlayer.name} `)
-
-    activePlayer.position = {
-      row: $this[0].attributes['data-row'].value,
-      column: $this[0].attributes['data-column'].value,
-    }
-    collectWeapon($this)
-    startFightLogic()
-    // const allPossibleSquares = document.querySelectorAll('.possible')
-    // allPossibleSquares.forEach(square => square.classList.remove('possible'))
-    switchPlayers()
-  } else {
-    alert('You can\'t move diagonally or jump blocked squares')
-  }
-}
-
-/* ------------ Collect Weapon  ------------- */
-//checks if target square contains a weapon and if so adds it to the weapon key in player object
-function collectWeapon($clickedSquare) {
-  weaponSwitch = (weaponString, weapon) => {
-    $clickedSquare.removeClass(weaponString)
-    $clickedSquare.addClass(activePlayer.weapon.name)
-    activePlayer.weapon = weapon
-    $clickedSquare.addClass(activePlayer.name)
-    updateFightArena()
-  }
-
-  if ($clickedSquare.hasClass('wrench')) {
-    weaponSwitch('wrench', wrench)
-  } else if ($clickedSquare.hasClass('rocket')) {
-    weaponSwitch('rocket', rocket)
-  } else if ($clickedSquare.hasClass('thunderbolt')) {
-    weaponSwitch('thunderbolt', thunderbolt)
-  } else if ($clickedSquare.hasClass('fire')) {
-    weaponSwitch('fire', fire)
-  }
-}
-
-/* -------------- Fight Logic ---------------- */
-
-function startFightLogic() {
-  if (checkIfFight()) {
-    playerChoice()
-  }
-}
-// check if players are on adjacent squares
-function checkIfFight() {
-  let playerOneRow = playerOne.position.row
-  let playerTwoRow = playerTwo.position.row
-  let playerOneColumn = playerOne.position.column
-  let playerTwoColumn = playerTwo.position.column
-
-  let conditionOne = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === 1)
-  let conditionTwo = (playerOneRow == playerTwoRow) && (playerOneColumn - playerTwoColumn === -1)
-  let conditionThree = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === 1)
-  let conditionFour = (playerOneColumn == playerTwoColumn) && (playerOneRow - playerTwoRow === -1)
-
-  let isFirstFight = (playerOne.healthscore === 100) && (playerTwo.healthscore === 100)
-
-  if (conditionOne || conditionTwo || conditionThree || conditionFour) {
-    renderFightArena(isFirstFight)
-    return true
-  } else {
-    return false
-  }
-}
-
-// Create Pop-up fight arena
-function renderFightArena(isFirstFight) {
-  checkWhoAttacks()
-  let defendingPlayer
-
-  if (playerOne.status === 'defending') {
-    defendingPlayer = playerOne
-  } else {
-    defendingPlayer = playerTwo
-  }
-  let fightArenaHTML =
-    `<div class="fight-view">
-        <h4>DEFEND</h4>
-        <p> lower the attacks impact by 50%</p> 
-      </div>
-    <div class="choiceForm">
-      <h2 class="js-defending-player">${defendingPlayer.name} choose:</h2>
-      <form id = "choiceForm" action = "input" >
-      <button name="defendButton" type="submit" class="defend" value="defend">defend</button>
-      <button name="attackButton " type="submit" class="attack" value="attack">attack</button>
-  </form >
-    </div>
-  <div class="fight-view">
-    <h4>ATTACK</h4>
-       <p> attack back with 100% impact </p>
-  </div>`
-
-  if (isFirstFight === true) {
-    board.insertAdjacentHTML('beforeend', `<div class="fight_arena">${fightArenaHTML}</div>`)
-    fightArena = document.querySelector('.fight_arena')
-  } else {
-    updateFightArena(defendingPlayer)
-    fightArena.classList.remove('hidden')
-  }
-}
-
-// check which player attacks
-function checkWhoAttacks() {
-  if (activePlayer === playerOne) {
-    playerOne.status = 'attacking'
-    playerTwo.status = 'defending'
-  } else {
-    playerTwo.status = 'attacking'
-    playerOne.status = 'defending'
-  }
-}
-
-// get value from clicked button in order to determine wether the attacked player defends or attacks back
-function playerChoice() {
-  form = document.getElementById('choiceForm')
-  $('#choiceForm').on('click', 'button', function () {
-    event.preventDefault()
-    let playerChoice = this.value
-    fight(playerChoice)
-    $("#choiceForm").unbind("click")
-  })
-}
-
-// execute fight after playerChoice
-function fight(playerChoice) {
-  console.log('fight is beeing executed')
-  let defendingPlayer
-  let attackingPlayer
-  let defendingPlayerChoice = playerChoice
-
-  if (playerOne.status === 'defending') {
-    defendingPlayer = playerOne
-    attackingPlayer = playerTwo
-  } else {
-    defendingPlayer = playerTwo
-    attackingPlayer = playerOne
-  }
-
-  attackingPlayerWeapon = attackingPlayer.weapon.power
-  defendingPlayerWeapon = defendingPlayer.weapon.power
-
-  if (defendingPlayerChoice === 'defend') {
-    defendingPlayer.healthscore -= (attackingPlayerWeapon * 0.5)
-  } else {
-    defendingPlayer.healthscore -= attackingPlayerWeapon
-    attackingPlayer.healthscore -= defendingPlayerWeapon
-  }
-  updateFightArena(defendingPlayer)
-  checkWin()
-}
-
-// Updates values in the fight arena pop-up
-function updateFightArena(defendingPlayer) {
-  const jsOneWeapon = document.querySelector('.js-pOneWeapon')
-  const jsOneWeaponPower = document.querySelector('.js-pOneWeaponPower')
-  const jsTwoWeapon = document.querySelector('.js-pTwoWeapon')
-  const jsTwoWeaponPower = document.querySelector('.js-pTwoWeaponPower')
-  const jsOne = document.querySelector('.js-pOneHealth')
-  const jsTwo = document.querySelector('.js-pTwoHealth')
-  const jsPlayerChoiceForm = document.querySelector('.js-defending-player')
-
-  if (defendingPlayer) {
-    jsPlayerChoiceForm.innerHTML = `${defendingPlayer.name} choose:`
-  }
-
-  jsOne.innerHTML = playerOne.healthscore
-  jsTwo.innerHTML = playerTwo.healthscore
-  jsOneWeapon.innerHTML = playerOne.weapon.name
-  jsOneWeaponPower.innerHTML = playerOne.weapon.power
-  jsTwoWeapon.innerHTML = playerTwo.weapon.name
-  jsTwoWeaponPower.innerHTML = playerTwo.weapon.power
+function weaponSwitch($clickedSquare, weaponString, weapon) {
+  $clickedSquare.removeClass(weaponString)
+  $clickedSquare.addClass(game.activePlayer.weapon.name)
+  game.activePlayer.weapon = weapon
+  $clickedSquare.addClass(game.activePlayer.name)
+  fight.updateFightArena()
 }
 
 function checkWin() {
-  console.log('pOne', playerOne.healthscore)
-  console.log('pTwo', playerTwo.healthscore)
-
   if (playerOne.healthscore <= 0) {
     board.innerHTML = `
     <p class="win">Player Two won</p>
@@ -329,8 +332,6 @@ function checkWin() {
       fightArena.classList.add('hidden'), 2000)
   }
 }
-
-/* -------------------------  helper functions ------------------------ */
 
 // function showWay() {
 //   let currentRow = activePlayer.position.row
@@ -381,7 +382,6 @@ function checkWin() {
 //     }
 //   }
 // }
-
 
 function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
@@ -447,8 +447,8 @@ function checkIfPathFree(square) {
 }
 
 function createTraversedSquares($clickedSquare) {
-  let playerRow = activePlayer.position.row
-  let playerColumn = activePlayer.position.column
+  let playerRow = game.activePlayer.position.row
+  let playerColumn = game.activePlayer.position.column
 
   let squareColumn = $clickedSquare.attr('data-column')
   let squareRow = $clickedSquare.attr('data-row')
@@ -513,20 +513,17 @@ function checkTraversedSquares(traversedSquares) {
 
 // switches the activePlayer
 function switchPlayers() {
-  if (activePlayer === playerOne) {
-    activePlayer = playerTwo
+  // console.log('game.activePlayer', game.activePlayer)
+  if (game.activePlayer === playerOne) {
+    game.activePlayer = playerTwo
     // showWay()
     $('.js-playerTwo_fight').addClass('active')
     $('.js-playerOne_fight').removeClass('active')
 
-    console.log('activePlayer', activePlayer.name)
   } else {
-    activePlayer = playerOne
+    game.activePlayer = playerOne
     // showWay()
     $('.js-playerOne_fight').addClass('active')
     $('.js-playerTwo_fight').removeClass('active')
-    console.log('activePlayer', activePlayer.name)
   }
 }
-
-renderBoard()
