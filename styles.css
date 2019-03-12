@@ -42,7 +42,7 @@ main {
   justify-content: center;
 }
 
-.grid-item.free:hover {
+.grid-item.possible:hover {
   background: lightcyan;
 }
 

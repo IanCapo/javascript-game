@@ -84,10 +84,12 @@ function Game(activePlayer) {
 
       gridContainer.appendChild(gridItem)
     })
+    showWay()
   }
 
   /* ------- MOVE PLAYER -------- */
   this.movePlayer = function ($this) {
+    this.allPossibleSquares = document.querySelectorAll('.possible')
     let squareCheck = createTraversedSquares($this)
     if (squareCheck) {
       $(`.grid-item.${this.activePlayer.name} `)
@@ -101,8 +103,8 @@ function Game(activePlayer) {
       }
       activePlayer.collectWeapon($this)
       this.startFightLogic()
-      // const allPossibleSquares = document.querySelectorAll('.possible')
-      // allPossibleSquares.forEach(square => square.classList.remove('possible'))
+
+      this.allPossibleSquares.forEach(square => square.classList.remove('possible'))
       switchPlayers()
     } else {
       alert('You can\'t move diagonally or jump blocked squares')
@@ -334,56 +336,6 @@ function checkWin() {
   }
 }
 
-// function showWay() {
-//   let currentRow = activePlayer.position.row
-//   let currentColumn = activePlayer.position.column
-
-//   // show way south
-//   for (let i = 0; i < 3; i++) {
-//     // if square does not have class .free
-//     if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).hasClass('free')) {
-//       console.log(`south ${i} not free`)
-//       // return out of for loop
-//     } else {
-//       $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).addClass('possible')
-//     }
-//     // check next direction
-//   }
-
-//   // show way north
-//   for (let i = 3; i >= 0; i--) {
-//     // if square does not have class .free
-//     if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).hasClass('free')) {
-//       console.log('not free')
-//       // return out of for loop
-//     } else {
-//       $(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).addClass('possible')
-//     }
-//   }
-
-//   // show way west
-//   for (let i = 0; i <= 3; i++) {
-//     // if square does not have class .free
-//     if (!$(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).hasClass('free')) {
-//       console.log('not free')
-//       // return out of for loop
-//     } else {
-//       $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).addClass('possible')
-//     }
-//   }
-
-//   // show way east
-//   for (let i = 3; i >= 0; i--) {
-//     // if square does not have class .free
-//     if (!$(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).hasClass('free')) {
-//       console.log('not free')
-//       // return out of for loop
-//     } else {
-//       $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).addClass('possible')
-//     }
-//   }
-// }
-
 function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
   return randomNumber
@@ -517,14 +469,67 @@ function switchPlayers() {
   // console.log('game.activePlayer', game.activePlayer)
   if (game.activePlayer === playerOne) {
     game.activePlayer = playerTwo
-    // showWay()
+    showWay()
     $('.js-playerTwo_fight').addClass('active')
     $('.js-playerOne_fight').removeClass('active')
 
   } else {
     game.activePlayer = playerOne
-    // showWay()
+    showWay()
     $('.js-playerOne_fight').addClass('active')
     $('.js-playerTwo_fight').removeClass('active')
+  }
+}
+
+
+
+/* optional */
+function showWay() {
+  let currentRow = parseInt(game.activePlayer.position.row)
+  let currentColumn = parseInt(game.activePlayer.position.column)
+
+  // show way south
+  for (let i = 0; i <= 3; i++) {
+    // if square does not have class .free
+    if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).hasClass('free')) {
+      console.log(`south ${i} not free`)
+      // return
+    } else {
+      $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).addClass('possible')
+    }
+    // check next direction
+  }
+
+  // show way north
+  for (let i = 3; i >= 0; i--) {
+    // if square does not have class .free
+    if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).hasClass('free')) {
+      console.log(`north ${i} not free`)
+      // return
+    } else {
+      $(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).addClass('possible')
+    }
+  }
+
+  // show way west
+  for (let i = 0; i <= 3; i++) {
+    // if square does not have class .free
+    if (!$(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).hasClass('free')) {
+      console.log(`west ${i} not free`)
+      // return
+    } else {
+      $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).addClass('possible')
+    }
+  }
+
+  // show way east
+  for (let i = 3; i >= 0; i--) {
+    // if square does not have class .free
+    if (!$(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).hasClass('free')) {
+      console.log(`east ${i} not free`)
+      // return
+    } else {
+      $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).addClass('possible')
+    }
   }
 }
