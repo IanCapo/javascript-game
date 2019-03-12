@@ -1,6 +1,6 @@
 const board = document.querySelector('main')
 let fightArena = ''
-let form = ''
+
 
 
 /* --- Create Constructor function called game */
@@ -118,6 +118,7 @@ function Game(activePlayer) {
 }
 
 function Fight() {
+  this.form
   // check if players are on adjacent squares
   this.checkIfFight = function () {
     let playerOneRow = playerOne.position.row
@@ -189,7 +190,7 @@ function Fight() {
 
   // get value from clicked button in order to determine wether the attacked player defends or attacks back
   this.playerChoice = function () {
-    form = document.getElementById('choiceForm')
+    this.form = document.getElementById('choiceForm')
     $('#choiceForm').on('click', 'button', function () {
       event.preventDefault()
       let playerChoice = this.value
@@ -285,10 +286,10 @@ class Weapon {
   }
 }
 
-const wrench = new Weapon('wrench', 'image', 10)
+const wrench = new Weapon('wrench', 'image', 20)
 const rocket = new Weapon('rocket', 'image', 40)
 const fire = new Weapon('fire', 'image', 30)
-const thunderbolt = new Weapon('thunderbolt', 'image', 60)
+const thunderbolt = new Weapon('thunderbolt', 'image', 50)
 const playerOne = new Player('playerOne', 'image', 100, wrench)
 const playerTwo = new Player('playerTwo', 'image', 100, wrench)
 
