@@ -489,10 +489,10 @@ function showWay() {
   showWayWest(currentRow, currentColumn)
 }
 
-// show way east
-function showWayEast(currentRow, currentColumn) {
+// show way north
+function showWayNorth(currentRow, currentColumn) {
   for (let i = 1; i <= 3; i++) {
-    let node = $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`)
+    let node = $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`)
     let nodeCheck = node.hasClass('blocked')
 
     if (!nodeCheck) {
@@ -508,10 +508,29 @@ function showWayEast(currentRow, currentColumn) {
   }
 }
 
-// show way north
-function showWayNorth(currentRow, currentColumn) {
+// // show way south
+function showWaySouth(currentRow, currentColumn) {
   for (let i = 1; i <= 3; i++) {
-    let node = $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`)
+    let node = $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`)
+    let nodeCheck = node.hasClass('blocked')
+
+    if (!nodeCheck) {
+      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
+        // jump to next step
+      } else {
+        node.addClass('possible')
+      }
+    } else {
+      // return out of for loop
+      break;
+    }
+  }
+}
+
+// show way east
+function showWayEast(currentRow, currentColumn) {
+  for (let i = 1; i <= 3; i++) {
+    let node = $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`)
     let nodeCheck = node.hasClass('blocked')
 
     if (!nodeCheck) {
@@ -547,21 +566,3 @@ function showWayWest(currentRow, currentColumn) {
   }
 }
 
-// // show way south
-function showWaySouth(currentRow, currentColumn) {
-  for (let i = 1; i <= 3; i++) {
-    let node = $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`)
-    let nodeCheck = node.hasClass('blocked')
-
-    if (!nodeCheck) {
-      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
-        // jump to next step
-      } else {
-        node.addClass('possible')
-      }
-    } else {
-      // return out of for loop
-      break;
-    }
-  }
-}
