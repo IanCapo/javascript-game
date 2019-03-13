@@ -1,15 +1,12 @@
 const board = document.querySelector('main')
 let fightArena = ''
 
-
-
-/* --- Create Constructor function called game */
-
+// constructor function Game
 function Game(activePlayer) {
   this.activePlayer = activePlayer
   this.squaresCounter = createRandomNumber(10, 20)
 
-  //Create an array of object with coordinates
+  //Create an array of objects with coordinates
   this.createSquaresArray = function () {
     let squaresArray = []
     for (let x = 1; x < 11; x++) {
@@ -119,6 +116,7 @@ function Game(activePlayer) {
   }
 }
 
+// constructor Function Fight
 function Fight() {
   this.form
   // check if players are on adjacent squares
@@ -251,12 +249,12 @@ function Fight() {
   }
 }
 
+// add Eventlistener to grid-container once document is ready
 $(document).ready(function () {
   $('.grid-container').on('click', '.grid-item', function () {
     game.movePlayer($(this))
   })
 })
-
 
 class Player {
   constructor(name, image, healthscore, weapon) {
@@ -302,7 +300,7 @@ game.renderBoard()
 
 /* -------------------------  helper functions ------------------------ */
 
-
+// switch weapon classes on node and player object
 function weaponSwitch($clickedSquare, weaponString, weapon) {
   $clickedSquare.removeClass(weaponString)
   $clickedSquare.addClass(game.activePlayer.weapon.name)
@@ -310,7 +308,7 @@ function weaponSwitch($clickedSquare, weaponString, weapon) {
   $clickedSquare.addClass(game.activePlayer.name)
   fight.updateFightArena()
 }
-
+// check if one of the players has 0 or less healthscore points
 function checkWin() {
   if (playerOne.healthscore <= 0) {
     board.innerHTML = `
@@ -335,12 +333,12 @@ function checkWin() {
       fightArena.classList.add('hidden'), 2000)
   }
 }
-
+// creates a random number between
 function createRandomNumber(min, max) {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min
   return randomNumber
 }
-
+// check if the path around the item is free and is used to render board 
 function checkIfPathFree(square) {
   let row = square.row
   let col = square.column
@@ -398,7 +396,7 @@ function checkIfPathFree(square) {
     }
   }
 }
-
+// creates an array containing all squares between current player position and the clicked square
 function createTraversedSquares($clickedSquare) {
   let playerRow = game.activePlayer.position.row
   let playerColumn = game.activePlayer.position.column
@@ -452,7 +450,7 @@ function createTraversedSquares($clickedSquare) {
     console.log('moving incorrectly: more than 3 squares or diagonally')
   }
 }
-
+// checks if squares in traversedSquares array have class blocked
 function checkTraversedSquares(traversedSquares) {
   let isBlocked = true
   for (let i = 0; i < traversedSquares.length; i++) {
@@ -466,7 +464,6 @@ function checkTraversedSquares(traversedSquares) {
 
 // switches the activePlayer
 function switchPlayers() {
-  // console.log('game.activePlayer', game.activePlayer)
   if (game.activePlayer === playerOne) {
     game.activePlayer = playerTwo
     showWay()
@@ -481,55 +478,90 @@ function switchPlayers() {
   }
 }
 
-
-
-/* optional */
+// shows possible moves to players
 function showWay() {
   let currentRow = parseInt(game.activePlayer.position.row)
   let currentColumn = parseInt(game.activePlayer.position.column)
 
-  // show way south
-  for (let i = 0; i <= 3; i++) {
-    // if square does not have class .free
-    if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).hasClass('free')) {
-      console.log(`south ${i} not free`)
-      // return
-    } else {
-      $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`).addClass('possible')
-    }
-    // check next direction
-  }
+  showWaySouth(currentRow, currentColumn)
+  showWayEast(currentRow, currentColumn)
+  showWayNorth(currentRow, currentColumn)
+  showWayWest(currentRow, currentColumn)
+}
 
-  // show way north
-  for (let i = 3; i >= 0; i--) {
-    // if square does not have class .free
-    if (!$(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).hasClass('free')) {
-      console.log(`north ${i} not free`)
-      // return
-    } else {
-      $(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`).addClass('possible')
-    }
-  }
+// show way east
+function showWayEast(currentRow, currentColumn) {
+  for (let i = 1; i <= 3; i++) {
+    let node = $(`[data-row= "${currentRow}"][data-column="${currentColumn + i}"]`)
+    let nodeCheck = node.hasClass('blocked')
 
-  // show way west
-  for (let i = 0; i <= 3; i++) {
-    // if square does not have class .free
-    if (!$(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).hasClass('free')) {
-      console.log(`west ${i} not free`)
-      // return
+    if (!nodeCheck) {
+      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
+        // jump to next step
+      } else {
+        node.addClass('possible')
+      }
     } else {
-      $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`).addClass('possible')
+      // return out of for loop
+      break;
     }
   }
+}
 
-  // show way east
-  for (let i = 3; i >= 0; i--) {
-    // if square does not have class .free
-    if (!$(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).hasClass('free')) {
-      console.log(`east ${i} not free`)
-      // return
+// show way north
+function showWayNorth(currentRow, currentColumn) {
+  for (let i = 1; i <= 3; i++) {
+    let node = $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`)
+    let nodeCheck = node.hasClass('blocked')
+
+    if (!nodeCheck) {
+      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
+        // jump to next step
+      } else {
+        node.addClass('possible')
+      }
     } else {
-      $(`[data-row= "${currentRow - i}"][data-column="${currentColumn}"]`).addClass('possible')
+      // return out of for loop
+      break;
+    }
+  }
+}
+
+// // show way west
+function showWayWest(currentRow, currentColumn) {
+
+  for (let i = 1; i <= 3; i++) {
+    let node = $(`[data-row= "${currentRow}"][data-column="${currentColumn - i}"]`)
+    let nodeCheck = node.hasClass('blocked')
+
+    if (!nodeCheck) {
+      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
+        // jump to next step
+      } else {
+        node.addClass('possible')
+      }
+    } else {
+      // return out of for loop
+      break;
+    }
+  }
+}
+
+// // show way south
+function showWaySouth(currentRow, currentColumn) {
+  for (let i = 1; i <= 3; i++) {
+    let node = $(`[data-row= "${currentRow + i}"][data-column="${currentColumn}"]`)
+    let nodeCheck = node.hasClass('blocked')
+
+    if (!nodeCheck) {
+      if (node.hasClass('playerOne') || node.hasClass('playerTwo')) {
+        // jump to next step
+      } else {
+        node.addClass('possible')
+      }
+    } else {
+      // return out of for loop
+      break;
     }
   }
 }
