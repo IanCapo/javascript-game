@@ -286,10 +286,10 @@ class Weapon {
   }
 }
 
-const wrench = new Weapon('wrench', 'image', 20)
-const rocket = new Weapon('rocket', 'image', 40)
-const fire = new Weapon('fire', 'image', 30)
-const thunderbolt = new Weapon('thunderbolt', 'image', 50)
+const wrench = new Weapon('wrench', 'image', 10)
+const rocket = new Weapon('rocket', 'image', 30)
+const fire = new Weapon('fire', 'image', 20)
+const thunderbolt = new Weapon('thunderbolt', 'image', 40)
 const playerOne = new Player('playerOne', 'image', 100, wrench)
 const playerTwo = new Player('playerTwo', 'image', 100, wrench)
 
