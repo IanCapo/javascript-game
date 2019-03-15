@@ -251,8 +251,12 @@ function Fight() {
 
 // add Eventlistener to grid-container once document is ready
 $(document).ready(function () {
-  $('.grid-container').on('click', '.grid-item', function () {
-    game.movePlayer($(this))
+  $('.js-start-game').on('click', function () {
+    $('.opener').addClass('hidden')
+    game.renderBoard()
+    $('.grid-container').on('click', '.grid-item', function () {
+      game.movePlayer($(this))
+    })
   })
 })
 
@@ -296,7 +300,7 @@ const playerTwo = new Player('playerTwo', 'image', 100, wrench)
 let game = new Game(playerOne)
 let fight = new Fight()
 const squaresArray = game.createSquaresArray()
-game.renderBoard()
+// game.renderBoard()
 
 /* -------------------------  helper functions ------------------------ */
 
@@ -315,7 +319,7 @@ function checkWin() {
     <p class="win">Player Two won</p>
     <p>Player One lost</p>
     <button class="restart">Play again</button>`
-    $('.restart').click(function () {
+    $('.restart').on('click', function () {
       location.reload();
     });
 
@@ -324,13 +328,13 @@ function checkWin() {
     <p class="win">Player One won</p>
     <p>Player Two lost</p>
     <button class="restart">Play again</button>`
-    $('.restart').click(function () {
+    $('.restart').on('click', function () {
       location.reload();
     });
 
   } else {
     setTimeout(() =>
-      fightArena.classList.add('hidden'), 2000)
+      fightArena.classList.add('hidden'), 0500)
   }
 }
 // creates a random number between
