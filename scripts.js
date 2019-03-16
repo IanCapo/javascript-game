@@ -300,7 +300,6 @@ const playerTwo = new Player('playerTwo', 'image', 100, wrench)
 let game = new Game(playerOne)
 let fight = new Fight()
 const squaresArray = game.createSquaresArray()
-// game.renderBoard()
 
 /* -------------------------  helper functions ------------------------ */
 
@@ -569,4 +568,3 @@ function showWayWest(currentRow, currentColumn) {
     }
   }
 }
-
