@@ -11,10 +11,34 @@ main {
   flex-direction: column;
   align-items: center;
   font-family: arial;
- 
 }
 
 .main {
+   border: 1px solid darkcyan;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+.opener {
+  position: absolute;
+  top: 15%;
+  background: #0b5335;
+  color: white;
+  padding: 80px;
+  text-align: left;
+  max-width: 50vw;
+  z-index: 1;
+  box-shadow: inset 14px 14px 173px 45px rgba(0,0,0,0.75);
+}
+
+.opener button {
+  background: black;
+  cursor: pointer;
+  color: white;
+}
+
+.board {
   display: flex;
   justify-content: space-evenly;
    border: 1px solid darkcyan;
@@ -42,7 +66,7 @@ main {
   justify-content: center;
 }
 
-.grid-item.free:hover {
+.grid-item.possible:hover {
   background: lightcyan;
 }
 
@@ -55,10 +79,6 @@ main {
   background: rgba(0, 173, 255, 0);
   box-shadow: inset 0 0 5px #23acc2;
 }
-
-/* .indoubt {
-  background: yellow;
-} */
 
 .rocket, .fire, .thunderbolt, .wrench, .playerOne, .playerTwo {
   font-family: 'simple-line-icons';
@@ -77,49 +97,55 @@ border: 1px solid #23acc2;
 box-shadow: inset 0px 0px 1px 5px #ffffff;
 }
 
-.rocket:hover, .fire:hover, .thunderbolt:hover, .wrench:hover {
+/* .rocket:hover, .fire:hover, .thunderbolt:hover, .wrench:hover {
   box-shadow: inset 0px 0px 1px 5px lightcyan;
-} 
+}  */
 
 .wrench {
-  background: yellow;
+  background: #f5da58;
 }
 
 .wrench:before {
   content: "\e052";
 }
 
+.wrench.possible:hover {
+  box-shadow: inset 0px 0px 1px 5px #f5da58;
+}
+
 .rocket {
-  background: rgb(240, 155, 52);
+  background: #EFAC4C;
 }
 
 .rocket:before {
   content: "\e05c";
 }
 
+.rocket.possible:hover {
+  box-shadow: inset 0px 0px 1px 5px #EFAC4C;
+}
+
 .fire {
-  background: lightblue;
+  background: #eb6363;
 }
 
 .fire:before {
   content: "\e01c";
 }
 
+.fire.possible:hover {
+  box-shadow: inset 0px 0px 1px 5px #eb6363;
+}
+
 .thunderbolt {
-  background: greenyellow;
+  background: #aaf537;
 }
 
 .thunderbolt:before {
   content: "\e020";
 }
-
-.playerOne {
-  background: lime;
-  box-shadow: none;
-}
-.playerTwo {
-  background: rgb(35, 102, 220);
-  box-shadow: none;
+.thunderbolt.possible:hover {
+  box-shadow: inset 0px 0px 1px 5px #aaf537;
 }
 
 .playerOne:before {
@@ -210,5 +236,15 @@ button.restart {
 }
 
 .possible {
-  background: #c7edc7;
+  background: #8ddbe366;
 } 
+
+.playerOne {
+  background: lime;
+  box-shadow: none;
+}
+.playerTwo {
+  background: rgb(35, 102, 220);
+  box-shadow: none;
+}
+
