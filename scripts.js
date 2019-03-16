@@ -249,17 +249,6 @@ function Fight() {
   }
 }
 
-// add Eventlistener to grid-container once document is ready
-$(document).ready(function () {
-  $('.js-start-game').on('click', function () {
-    $('.opener').addClass('hidden')
-    game.renderBoard()
-    $('.grid-container').on('click', '.grid-item', function () {
-      game.movePlayer($(this))
-    })
-  })
-})
-
 class Player {
   constructor(name, image, healthscore, weapon) {
     this.name = name
@@ -568,3 +557,16 @@ function showWayWest(currentRow, currentColumn) {
     }
   }
 }
+
+// add Eventlistener to grid-container once document is ready
+function start() {
+  $('.js-start-game').on('click', function () {
+    $('.opener').addClass('hidden')
+    game.renderBoard()
+    $('.grid-container').on('click', '.grid-item', function () {
+      game.movePlayer($(this))
+    })
+  })
+}
+
+$(start)
